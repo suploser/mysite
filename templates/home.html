@@ -2,9 +2,56 @@
 {% load staticfiles %}
 {% block title %}我的站点|首页{% endblock %}
 {% block header_extends %}
+    <!-- {{ read_num_list }}
+    {{ date_list }} -->
     <link rel="stylesheet" type="text/css" href={% static 'home_content.css' %}>
+    <script src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
 {% endblock %}
 {% block content %}
-    <h3 class="home_content">欢迎来到我的博客，#-#</h3>   
+    <h3 class="home_content">欢迎来到我的博客，#-#</h3>  
+    <div id="container"></div>
+    <script>
+        // 图表配置
+        var options = {
+            chart: {
+                type: 'line'                          //指定图表的类型，默认是折线图（line）
+            },
+            title: {
+                text: null                 // 标题
+            },
+            xAxis: {
+                title:{
+                    text:null
+                },
+                categories: {{ date_list | safe }},
+                tickmarkPlacement:'on',
+                  
+            },
+            yAxis: {
+                title: {
+                    text: null                // y 轴标题
+                },
+                labels:{
+                    enabled:false,
+                },
+                gridLineDashStyle:'Dash',
+            },
+            credits:{ enabled: false },
+            series: [{                              // 数据列
+                name: '阅读量',                        // 数据列名
+                data: {{ read_num_list }}                     // 数据
+            },],
+            legend:{ enabled: false},
+            plotOptions: {
+            line: {
+                dataLabels: {
+                    enabled: true
+                }
+            }
+        }
+        };
+        // 图表初始化函数
+        var chart = Highcharts.chart('container', options);
+    </script> 
 {% endblock %}
 {% block home_active %}active{% endblock %}
