@@ -1,0 +1,33 @@
+ul.blog-type li {
+    list-style: none;
+}
+ul.blog-info {
+    list-style-type: none;
+    margin-bottom: 2em;
+}
+ul.blog-info li {
+    display: inline-block;
+    margin-right: 2em
+}
+/*该类的最后一个div不执行*/
+div.blog:not(:last-child){
+    margin-bottom: 2em;
+    border-bottom: 1px solid #ccc
+}
+div.blog h3{
+    margin-top: 0.5em; 
+}
+div.blog-content {
+    text-indent: 2em; 
+}
+p.blog-info {
+    margin-top: 2em;
+}
+
+div.paginator {
+    text-align: center;
+}
+
+div.blog-more {
+    margin-top: 2em;
+}
