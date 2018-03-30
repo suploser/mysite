@@ -29,4 +29,4 @@ class Blog(models.Model, ReadNumExpand):
 class ReadNum(models.Model):
     read_num = models.IntegerField(default=0)
     blog = models.OneToOneField(Blog, on_delete=models.DO_NOTHING)
-    '''
+'''

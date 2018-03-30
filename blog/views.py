@@ -3,7 +3,6 @@ from django.core.paginator import Paginator
 from .models import Blog, BlogType
 from django.db.models import Count
 from django.conf import settings
-from read_statistics.utils import read_statistics_once_read
 
 def deal_common(request, blogs):
     page_num = int(request.GET.get('page', 1))
@@ -56,7 +55,7 @@ def blogs_by_date(request, year, month):
 
 def blog_detail(request, blog_id):
     blog = get_object_or_404(Blog, pk=blog_id)
-    cookies_key = read_statistics_once_read(request, blog)
+    cookies_key = blog.read_statistics_once_read(request)
     #上一篇，下一篇文章
     previous_blog = Blog.objects.filter(created_time__gt=blog.created_time).last()
     next_blog = Blog.objects.filter(created_time__lt=blog.created_time).first()
