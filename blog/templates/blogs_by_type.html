@@ -1,0 +1,9 @@
+{% extends 'blogs_list.html' %}
+{% block title %}{{ blog_type.type_name }}{% endblock %}
+
+{% block blog_list_name %}{{ blog_type.type_name}}{% endblock %}
+<!-- {% block pagination %}{% endblock %} -->
+<!-- 模板类型:
+过滤器：字符截取：truncatecahrs, date, length
+详见 https://docs.djangoproject.com/en/2.0/ref/templates/builtins/
+ -->
