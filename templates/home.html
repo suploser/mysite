@@ -21,7 +21,7 @@
             },
             xAxis: {
                 title:{
-                    text:null
+                    text:'七日阅读量'
                 },
                 categories: {{ date_list | safe }},
                 tickmarkPlacement:'on',
@@ -53,5 +53,48 @@
         // 图表初始化函数
         var chart = Highcharts.chart('container', options);
     </script> 
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-4 col-md-4">
+                <div class="hot-blog">
+                    <ul>
+                        <h3>本周热榜</h3>
+                        {% for hot_blog in hot_blog_list %}
+                            <li><a href="{% url 'blog_detail' hot_blog.id %}">{{ hot_blog.title }}</a>({{ hot_blog.read_num }})</li>
+                        {% empty %}
+                            <h3>本周暂无热门博客</h3>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <div class="col-xs-4 col-md-4">
+                <div class="hot-blog">
+                    <ul>
+                        <h3>今日热榜</h3>
+                        {% for hot_blog in today_hot_blog_list %}
+                            <li><a href="{% url 'blog_detail' hot_blog.id %}">{{ hot_blog.title }}</a>({{ hot_blog.read_num }})</li>
+                        {% empty %}
+                            <h3>今日暂无热门博客</h3>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <div class="col-xs-4 col-md-4">
+                <div class="hot-blog">
+                    <ul>
+                        <h3>昨日热榜</h3>
+                        {% for hot_blog in yesterday_hot_blog_list %}
+                            <li><a href="{% url 'blog_detail' hot_blog.id %}">{{ hot_blog.title }}</a>({{ hot_blog.read_num }})</li>
+                        {% empty %}
+                            <h3>昨日暂无热门博客</h3>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    
 {% endblock %}
 {% block home_active %}active{% endblock %}
