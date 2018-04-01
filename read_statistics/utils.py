@@ -1,9 +1,12 @@
 # 阅读统计
 from datetime import timedelta
 from django.utils import timezone
+from django.conf import settings
+from django.core.cache import cache
 from django.db.models import Sum
 from django.contrib.contenttypes.models import ContentType
 from .models import ReadNums
+
 
 class ReadNumExpand(object):
 
@@ -37,7 +40,9 @@ class ReadNumExpand(object):
         else:
             return 0
 
-def get_seven_days_read_nums():
+    @classmethod
+    def get_seven_days_read_nums(cls):
+        content_type = ContentType.objects.get_for_model(cls)
         read_date = timezone.now().date()
         date_list = []
         read_num_list = []
@@ -45,7 +50,8 @@ def get_seven_days_read_nums():
             date = read_date - timedelta(days=i)
             date_list.append(date.strftime('%m-%d'))
             global total_nums_by_date
-            read_num_set = ReadNums.objects.filter(read_date=date)
+            read_num_set = ReadNums.objects.filter(
+                content_type=content_type, read_date=date)
             if read_num_set:
                 total_nums_by_date = read_num_set.aggregate(read_nums_by_day=\
                     Sum('read_num'))
@@ -54,3 +60,46 @@ def get_seven_days_read_nums():
                 read_num_list.append(0)
             
         return read_num_list, date_list
+
+    @classmethod
+    def get_one_day_hot_blog_list(cls, date):
+        one_day_hot_blog_list = cls.objects.filter(
+            read_num_obj__read_date=date).\
+        values('id', 'title').annotate(
+            read_num=Sum('read_num_obj__read_num')).\
+        order_by('-read_num_obj__read_num')
+        return one_day_hot_blog_list[:7]
+
+    @classmethod
+    def get_7_days_hot_blog_list(cls):
+        today = timezone.now().date()
+        date = today - timedelta(days=7)
+        instances = cls.objects.filter(
+            read_num_obj__read_date__lt=today,\
+            read_num_obj__read_date__gte=date)
+        hot_blog_list = instances.values('id', 'title').\
+        annotate(read_num=Sum('read_num_obj__read_num')).\
+        order_by('-read_num')
+        return hot_blog_list[:7]
+
+    @staticmethod
+    def use_cache():
+        today = timezone.now().date()
+        yesterday  =today - timedelta(days=1)
+        today_hot_blog_list = cache.get('today_hot_blog_list')
+        if today_hot_blog_list is None:
+            today_hot_blog_list = cache.set('today_hot_blog_list',
+            get_one_day_hot_blog_list(today), settings.CACHES_EXPIRE)
+        # else:
+        #     print('cache')
+        yesterday_hot_blog_list = cache.get('yesterday_hot_blog_list')
+        if yesterday_hot_blog_list is None:
+            yesterday_hot_blog_list = cache.set('yesterday_hot_blog_list',
+            get_one_day_hot_blog_list(yesterday), settings.CACHES_EXPIRE)
+        hot_blog_list = cache.get('today_hot_blog_list')
+        if hot_blog_list is None:
+            hot_blog_list = cache.set('hot_blog_list',
+            get_7_days_hot_blog_list(), settings.CACHES_EXPIRE)
+        return today_hot_blog_list, yesterday_hot_blog_list, hot_blog_list
+                    
+
