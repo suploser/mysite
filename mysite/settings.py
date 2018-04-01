@@ -108,7 +108,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
-
+CACHES = {
+    'default' : {
+        'BACKEND' : 'django.core.cache.backends.db.DatabaseCache' ,
+        'LOCATION' : 'my_cache_table' ,
+    }
+}
 LANGUAGE_CODE = 'zh-hans'
 
 TIME_ZONE = 'UTC'
@@ -133,3 +138,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 CKEDITOR_UPLOAD_PATH = 'upload/'
 EACH_PAGE_BLOG_NUMS = 7
+
+CACHES_EXPIRE = 1
