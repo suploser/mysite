@@ -46,7 +46,7 @@ class ReadNumExpand(object):
         read_date = timezone.now().date()
         date_list = []
         read_num_list = []
-        for i in range(6,-1,-1):
+        for i in range(7,0,-1):
             date = read_date - timedelta(days=i)
             date_list.append(date.strftime('%m-%d'))
             global total_nums_by_date
@@ -82,24 +82,28 @@ class ReadNumExpand(object):
         order_by('-read_num')
         return hot_blog_list[:7]
 
-    @staticmethod
-    def use_cache():
+    @classmethod
+    def use_cache(cls):
         today = timezone.now().date()
-        yesterday  =today - timedelta(days=1)
+        yesterday  = today - timedelta(days=1)
         today_hot_blog_list = cache.get('today_hot_blog_list')
         if today_hot_blog_list is None:
-            today_hot_blog_list = cache.set('today_hot_blog_list',
-            get_one_day_hot_blog_list(today), settings.CACHES_EXPIRE)
-        # else:
-        #     print('cache')
+            cache.set('today_hot_blog_list',\
+            cls.get_one_day_hot_blog_list(today), settings.CACHES_EXPIRE)
+            today_hot_blog_list = cls.get_one_day_hot_blog_list(today)
+        else: 
+            print('cache')
         yesterday_hot_blog_list = cache.get('yesterday_hot_blog_list')
         if yesterday_hot_blog_list is None:
-            yesterday_hot_blog_list = cache.set('yesterday_hot_blog_list',
-            get_one_day_hot_blog_list(yesterday), settings.CACHES_EXPIRE)
+            cache.set('yesterday_hot_blog_list',\
+            cls.get_one_day_hot_blog_list(yesterday), settings.CACHES_EXPIRE)
+            yesterday_hot_blog_list = cls.get_one_day_hot_blog_list(yesterday)
+            
         hot_blog_list = cache.get('today_hot_blog_list')
         if hot_blog_list is None:
-            hot_blog_list = cache.set('hot_blog_list',
-            get_7_days_hot_blog_list(), settings.CACHES_EXPIRE)
+            cache.set('hot_blog_list',\
+            cls.get_7_days_hot_blog_list(), settings.CACHES_EXPIRE)
+            hot_blog_list = cls.get_7_days_hot_blog_list()
         return today_hot_blog_list, yesterday_hot_blog_list, hot_blog_list
                     
 
