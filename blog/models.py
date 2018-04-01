@@ -1,6 +1,8 @@
 from django.db import models
 from ckeditor_uploader.fields import RichTextUploadingField
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.auth.models import User
+from read_statistics.models import ReadNums
 from read_statistics.utils import ReadNumExpand
 class BlogType(models.Model):
     type_name = models.CharField(max_length=15)
@@ -16,6 +18,7 @@ class Blog(models.Model, ReadNumExpand):
     blog_type = models.ForeignKey(BlogType, on_delete=models.DO_NOTHING)
     # read_nums = models.IntegerField(default=0)
     content = RichTextUploadingField()
+    read_num_obj = GenericRelation(ReadNums)
     author = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     created_time = models.DateTimeField(auto_now_add=True)
     last_update_time = models.DateTimeField(auto_now=True)
