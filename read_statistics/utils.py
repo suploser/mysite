@@ -99,7 +99,7 @@ class ReadNumExpand(object):
             cls.get_one_day_hot_blog_list(yesterday), settings.CACHES_EXPIRE)
             yesterday_hot_blog_list = cls.get_one_day_hot_blog_list(yesterday)
             
-        hot_blog_list = cache.get('today_hot_blog_list')
+        hot_blog_list = cache.get('hot_blog_list')
         if hot_blog_list is None:
             cache.set('hot_blog_list',\
             cls.get_7_days_hot_blog_list(), settings.CACHES_EXPIRE)
