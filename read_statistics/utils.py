@@ -87,20 +87,20 @@ class ReadNumExpand(object):
         today = timezone.now().date()
         yesterday  = today - timedelta(days=1)
         today_hot_blog_list = cache.get('today_hot_blog_list')
-        if today_hot_blog_list is None:
+        if not today_hot_blog_list:
             cache.set('today_hot_blog_list',\
             cls.get_one_day_hot_blog_list(today), settings.CACHES_EXPIRE)
             today_hot_blog_list = cls.get_one_day_hot_blog_list(today)
         else: 
             print('cache')
         yesterday_hot_blog_list = cache.get('yesterday_hot_blog_list')
-        if yesterday_hot_blog_list is None:
+        if not yesterday_hot_blog_list:
             cache.set('yesterday_hot_blog_list',\
             cls.get_one_day_hot_blog_list(yesterday), settings.CACHES_EXPIRE)
             yesterday_hot_blog_list = cls.get_one_day_hot_blog_list(yesterday)
             
         hot_blog_list = cache.get('hot_blog_list')
-        if hot_blog_list is None:
+        if not hot_blog_list:
             cache.set('hot_blog_list',\
             cls.get_7_days_hot_blog_list(), settings.CACHES_EXPIRE)
             hot_blog_list = cls.get_7_days_hot_blog_list()
