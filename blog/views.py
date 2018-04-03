@@ -1,4 +1,4 @@
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, render, get_object_or_404
 from django.core.paginator import Paginator
 from .models import Blog, BlogType
 from django.db.models import Count
@@ -37,7 +37,7 @@ def deal_common(request, blogs):
 def blogs_list(request):
     blogs_list = Blog.objects.all()
     context = deal_common(request, blogs_list)
-    return render_to_response('blogs_list.html', context=context)
+    return render(request,'blogs_list.html', context=context)
 
 def blogs_by_type(request, blog_type_id):
     blog_type = get_object_or_404(BlogType, pk=blog_type_id)
@@ -45,13 +45,13 @@ def blogs_by_type(request, blog_type_id):
     blogs = Blog.objects.filter(blog_type=blog_type)
     context = deal_common(request, blogs)
     context['blog_type'] = blog_type
-    return render_to_response('blogs_by_type.html', context=context)
+    return render(request,'blogs_by_type.html', context=context)
 
 def blogs_by_date(request, year, month):
     blogs = Blog.objects.filter(created_time__year=year, created_time__month=month)
     context = deal_common(request, blogs)
     context['blog_list_title'] = '%s 年 %s 月'% (year, month)
-    return render_to_response('blogs_by_date.html', context=context)
+    return render(request,'blogs_by_date.html', context=context)
 
 def blog_detail(request, blog_id):
     blog = get_object_or_404(Blog, pk=blog_id)
@@ -63,6 +63,6 @@ def blog_detail(request, blog_id):
     context['blog'] = blog
     context['previous_blog'] = previous_blog
     context['next_blog'] = next_blog
-    response = render_to_response('blog_detail.html', context=context)
+    response = render(request,'blog_detail.html', context=context)
     response.set_cookie(cookies_key, 'true')
     return response
