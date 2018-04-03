@@ -31,3 +31,11 @@ div.paginator {
 div.blog-more {
     margin-top: 2em;
 }
+
+div.comment-area {
+    margin-top: 4em;
+}
+
+h3.comment-area-title {
+    border-bottom: 1px solid #ccc
+}
