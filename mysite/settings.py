@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     'blog',
     'read_statistics',
+    'comment',
 ]
 
 MIDDLEWARE = [
@@ -139,4 +140,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 CKEDITOR_UPLOAD_PATH = 'upload/'
 EACH_PAGE_BLOG_NUMS = 7
 
-CACHES_EXPIRE = 1
+CACHES_EXPIRE = 60
