@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}我的站点|首页{% endblock %}
+{% block header_extends %}
+    <!-- {{ read_num_list }}
+    {{ date_list }} -->
+    <link rel="stylesheet" type="text/css" href={% static 'home_content.css' %}>
+    <script src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+{% endblock %}
+{% block content %}
+   <h3>{{message}}</h3><a href="{{ redirect_to }}">返回</a>
+{% endblock %}
+{% block home_active %}active{% endblock %}
