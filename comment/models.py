@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from blog.models import User
+from custom_user.models import User
 # Create your models here.
 
 class Comment(models.Model):
