@@ -47,18 +47,7 @@
                 </form>
             {% else %}
                 <h4>未登录,请登录后评论!</h4>
-                <form action="{% url 'login' %}" class="form-inline" method="POST" style="margin-top: 2em">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <lable class="sr-only" for="username"><h4>username</h4></lable>
-                        <input id="username" type="text" class="form-control" name="username" placeholder="UserName">
-                    </div>
-                    <div class="form-group">
-                        <lable class="sr-only" for="password"><h4>password</h4></lable>
-                        <input id="password" type="password" class="form-control" name="password" placeholder="PassWord">
-                    </div>
-                    <input type="submit" class="btn btn-default" value="登录">
-                </form>
+                <a href="{% url 'login' %}?from={{ request.get_full_path }}">登录</a>或<a href="{% url 'regist' %}?from={{ request.get_full_path }}">注册</a>
             {% endif %}
         </div>
         <div class="comment-area">

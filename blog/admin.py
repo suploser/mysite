@@ -15,7 +15,3 @@ class ReadNumAdmin(admin.ModelAdmin):
     list_display = ('read_num', 'blog')
     '''
 # admin.models.register(Blog, BlogTypeAdmin)
-
-@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'password')
