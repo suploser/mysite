@@ -48,7 +48,7 @@
                 </form>
             {% else %}
                 <h4>未登录,请登录后评论!</h4>
-                <a href="{% url 'login' %}?from={{ request.get_full_path }}">登录</a>或<a href="{% url 'regist' %}?from={{ request.get_full_path }}">注册</a>
+                <a href="{% url 'login' %}?from={{ request.get_full_path }}" class="btn btn-primary">登录</a>&nbsp;或&nbsp;<a href="{% url 'regist' %}?from={{ request.get_full_path }}" class="btn btn-danger">注册</a>
             {% endif %}
         </div>
         <div class="comment-area">
