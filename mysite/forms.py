@@ -15,7 +15,6 @@ class loginForm(forms.Form):
             raise forms.ValidationError('用户名或密码错误')
         else:
             self.cleaned_data['user'] = user
-
         return self.cleaned_data
 
 class RegForm(forms.Form):
