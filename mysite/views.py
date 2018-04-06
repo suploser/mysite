@@ -35,6 +35,7 @@ def login(request):
         '''
     login_form = loginForm()
     if request.method == 'POST':
+        # print(request.POST.get('csrfmiddlewaretoken', ''))
         login_form = loginForm(request.POST)
         if login_form.is_valid():
             user = login_form.cleaned_data['user']
