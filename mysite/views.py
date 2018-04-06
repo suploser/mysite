@@ -73,7 +73,7 @@ def regist(request):
 def logout(request):
     referer = request.META.get('HTTP_REFERER',reverse('home'))
     session_key = request.session.session_key
-    print(session_key)
+    # print(session_key)
     if request.session.exists(session_key):
         request.session.delete(session_key)
     return redirect(referer)
