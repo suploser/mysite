@@ -1,5 +1,5 @@
 from datetime import timedelta
-from django.shortcuts import render_to_response,render,redirect
+from django.shortcuts import render,redirect
 from django.urls import reverse
 from custom_user.models import User
 from blog.models import Blog
@@ -34,6 +34,7 @@ def login(request):
         return render(request, 'error.html', {'message':'用户名或密码错误'})
         '''
     login_form = loginForm()
+    referer = request.GET.get('from', reverse('home'))
     if request.method == 'POST':
         # print(request.POST.get('csrfmiddlewaretoken', ''))
         login_form = loginForm(request.POST)
@@ -44,9 +45,9 @@ def login(request):
             request.session['username'] = user.username
             request.session['password'] = user.password
             request.session['user'] = 'user'
-            referer = request.GET.get('from', reverse('home'))
+            
             return redirect(referer)
-    return render(request, 'login.html', {'login_form':login_form})
+    return render(request, 'login.html', {'login_form':login_form,'referer':referer})
 
 
 def regist(request):
