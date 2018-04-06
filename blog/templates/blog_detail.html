@@ -34,7 +34,8 @@
         <!-- {{ request.COOKIES }} -->
         <div class="comment-area">
             <h3 class="comment-area-title">提交评论</h3>
-            {% if request.session.session_key %}
+            <!-- sessionkey可能还存在于session表中,但没有对应的键值 -->
+            {% if request.session.username %}
                 <form action="{% url 'update_comment' %}" method="POST" style="overflow:hidden;">
                     {% csrf_token %}
                     <div class="form-group">
