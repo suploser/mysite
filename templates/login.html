@@ -22,7 +22,8 @@
                                 <p>{{ field.errors.as_text }}</p>
                             </div>
                             {% endfor %}
-                            <span>{{ login_form.non_field_errors }}</span>        
+                            <span>{{ login_form.non_field_errors }}</span>   
+                            <span><a href="{% url 'regist' %}?from={{ referer }}" class="">没有账号?点击注册</a></span>     
                             <input type="submit" value="登录" class="btn btn-primary pull-right">
                             </form>
                         </div>
