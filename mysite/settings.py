@@ -69,6 +69,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'mysite.overall_form.overall_form',
             ],
         },
     },
@@ -121,7 +122,7 @@ CACHES = {
 }
 LANGUAGE_CODE = 'zh-hans'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
@@ -142,6 +143,23 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 CKEDITOR_UPLOAD_PATH = 'upload/'
+CKEDITOR_CONFIGS = {
+    'comment_ckeditor': {
+        'toolbar': 'Custom',
+        'toolbar_Custom': [
+            ['Bold', 'Italic', 'Underline', 'Strike','Subscript','Superscript'],
+            ['TextColor','BGColor','RemoveFormat'],
+            ['NumberedList','BulletedList'],
+            ['Link', 'Unlink'],
+            ['Smiley','SpecialChar','Blockquote'],
+        ],
+        'width':'auto',
+        'height':'180',
+        'tabSpaces':4,
+        'removePlugins':'elementspath',
+        'resize_enabled':False,   
+        }
+}
 EACH_PAGE_BLOG_NUMS = 7
 
 CACHES_EXPIRE = 60
