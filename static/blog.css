@@ -39,3 +39,7 @@ div.comment-area {
 h3.comment-area-title {
     border-bottom: 1px solid #ccc
 }
+
+div.django-ckeditor-widget {
+    width:100%;
+}
