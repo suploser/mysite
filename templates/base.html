@@ -28,10 +28,10 @@
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                 {% if request.session.username %}
-                    <li><a href="">{{ request.session.username }}~~,欢迎</a></li>
+                    <li><a href="#">{{ request.session.username }}~~,欢迎</a></li>
                     <li><a href="{% url 'logout' %}">注销</a></li>
                 {% else %}
-                    <li><a href="{% url 'login' %}">登录/注册</a></li>
+                    <li><a href="#" data-toggle="modal" data-target="#login">登录/注册</a></li>
              {% endif %}
              </ul>
             </div>
@@ -40,9 +40,162 @@
 
     
     {% block content %}{% endblock %}
+    <!-- 登陆模态框 -->
+    <div class="modal fade" id="login" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+           <div class="modal-content">
+               <div class="modal-header">
+                   <button type="button" class="close" data-dismiss="modal">
+                       &times;
+                   </button>
+                   <h4 class="modal-title" id="myModalLabel">
+                       登录
+                   </h4>
+               </div>
+               <div class="modal-body">
+                    <form id="login-form" action="#" method="POST">
+                        {% csrf_token %}
+                        {% for field in loginForm %}
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        <p id="{{ field.id_for_label}}-error" class='text-danger'></p>
+                        {% endfor %}
+                        <p id="non-field-error" class='text-danger'></p>
+                    </form>
+               </div>
+               <div class="modal-footer">
+                    <button type="button" class="btn btn-danger pull-left" data-toggle="modal" data-target="#regist">注册</button>
+                   <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                    </button>
+                    <button id="false-login" type="button" class="btn btn-primary">
+                    登录
+                    </button>
+               </div>
+           </div> 
+        </div>
+    </div>
+    <!-- 注册模态框 -->
+    <div class="modal fade" id="regist" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+           <div class="modal-content">
+               <div class="modal-header">
+                   <button type="button" class="close" data-dismiss="modal">
+                       &times;
+                   </button>
+                   <h4 class="modal-title" id="myModalLabel">
+                       注册
+                   </h4>
+               </div>
+               <div class="modal-body">
+                    <form id="regist-form" action="#" method="POST">
+                        {% csrf_token %}
+                        {% for field in RegForm %}
+                            <label for="{{  field.id_for_label }}">{{ field.label }}</label>
+                            {{field}}
+                            <p id="{{ field.id_for_label }}-error" class="text-danger"></p>
+                        {% endfor %}
+                    </form>
+               </div>
+               <div class="modal-footer">
+                   <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                    </button>
+                    <button id="false-regist" type="button" class="btn btn-primary">
+                    注册
+                    </button>
+               </div>
+           </div> 
+        </div>
+    </div>
     <script src="{% static 'jquery1.12.4.min.js' %}"></script>
     <script src="{% static 'bootstrap-3.3.7-dist/js/bootstrap.min.js' %}"></script>
-    
+    <script>
+        $('#login').on('show.bs.modal', function(){
+          $('#login-username').val('');
+          $('#login-password').val('');
+          $('.text-danger').text('');
+        })
+        $('#regist').on('show.bs.modal', function () {
+                $('#login').modal('hide');
+                $('#reg-username').val('');
+                $('#email').val('');
+                $('.reg-password').val('');
+                $('.text-danger').text('');
+            })
+    </script>
+    <script>
+      // 登录
+      $('#false-login').click(function(){
+        $('.text-danger').text('');
+        data = $('#login-form').serialize();
+        $.ajax({
+          url:'{% url "overall_login" %}',
+          type:'POST',
+          data:data,
+          cache:false,
+          success:function(data){
+            if(data.status=='Error'){
+              if(data.username_error!=''){
+                $('#login-username-error').text(data.username_error);
+                return;
+              }
+              if(data.password_error!=''){
+                $('#login-password-error').text(data.password_error);
+                return;
+              }
+              if(data.non_field_error!=''){
+                $('#non-field-error').text(data.non_field_error);
+                return;
+              }
+          }else{
+              var referer = data.referer;
+              window.location.href = referer;
+            }
+          },
+          error:function(xhr){
+            console.log(xhr);
+          }
+        })
+      });
+      // 注册
+      $('#false-regist').click(function(){
+        $('.text-danger').text('');
+        data = $('#regist-form').serialize();
+        $.ajax({
+            url:"{% url 'overall_regist' %}",
+            type:"POST",
+            data:data,
+            cache:false,
+            success:function(data){
+              console.log(data);
+              if(data.status=='Error'){
+                if(data.username_error!=''){
+                  $('#reg-username-error').text(data.username_error);
+                  return;
+                }
+                if(data.email_error!=''){
+                  $('#email-error').text(data.email_error);
+                  return;
+                }
+                if(data.password_error!=''){
+                  $('#id_password-error').text(data.password_error);
+                  return;
+                }
+                if(data.password_again_error!=''){
+                  $('#id_password_again-error').text(data.password_again_error);
+                  return;
+                }
+              }else{
+                window.location.href = data.referer
+              }
+            },
+            error:function(xhr){
+              console.log(xhr);
+            }
+
+        });
+      });
+    </script>
+    {% block scriptarea %}{% endblock %}
 </body> 
 </html>
 <!-- navbar-fixed-top role="navigation" -->
