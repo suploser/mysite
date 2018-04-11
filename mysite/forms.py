@@ -3,13 +3,20 @@ from custom_user.models import User
 
 class loginForm(forms.Form):
     username = forms.CharField(label='用户名',
-     widget=forms.TextInput(attrs={'id':'username', 'class':'form-control'}))
-    password = forms.CharField(label='密码', 
-        widget=forms.PasswordInput(attrs={'id':'password','class':'form-control'}))
+        widget=forms.TextInput(
+            attrs={'id':'login-username', 'class':'form-control'}),
+        error_messages={'required':'用户名不能为空'}
+        )
+    password = forms.CharField(
+        label='密码', 
+        widget=forms.PasswordInput(
+            attrs={'id':'login-password','class':'form-control'}),
+        error_messages={'required':'密码不能为空'}
+        )
 
     def clean(self):
-        username = self.cleaned_data['username']
-        password = self.cleaned_data['password']
+        username = self.cleaned_data.get('username','')
+        password = self.cleaned_data.get('password','')
         user = User.objects.filter(username=username, password=password).first()
         if not user:
             raise forms.ValidationError('用户名或密码错误')
@@ -18,17 +25,21 @@ class loginForm(forms.Form):
         return self.cleaned_data
 
 class RegForm(forms.Form):
-    username = forms.CharField(label='用户名', 
+    username = forms.CharField(
+        label='用户名', 
         min_length=6, max_length=20,
-        widget=forms.TextInput(attrs={'id':'username', 'class':'form-control'}))
+        widget=forms.TextInput(
+            attrs={'id':'reg-username', 'class':'form-control'}),
+        # error_messages={'required':'用户名不能为空'}
+        )
     email = forms.EmailField(label='邮箱',
-        widget=forms.EmailInput(attrs={'class':'form-control'}))
+        widget=forms.EmailInput(attrs={'id':'email', 'class':'form-control'}))
     password = forms.CharField(label='密码',
         max_length=20, min_length=8,
-        widget=forms.PasswordInput(attrs={'class':'form-control'}))
+        widget=forms.PasswordInput(attrs={'class':'form-control reg-password'}))
     password_again = forms.CharField(label='再一次输入密码',
         max_length=20, min_length=8,
-        widget=forms.PasswordInput(attrs={'class':'form-control'}))
+        widget=forms.PasswordInput(attrs={'class':'form-control reg-password'}))
 
     def clean_username(self):
         username = self.cleaned_data['username']
