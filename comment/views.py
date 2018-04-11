@@ -1,32 +1,28 @@
 from django.shortcuts import render, redirect
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
+from django.http import JsonResponse, HttpResponse
 from .models import Comment
+from comment.forms import CommentForm
 # Create your views here.
 def update_comment(request):
-    referer = request.META.get('HTTP_REFERER', reverse('home'))
+    data={}
+    comment_form = CommentForm(request.POST, session=request.session)
+    if comment_form.is_valid():
+        user = comment_form.cleaned_data['user']
+        content_object = comment_form.cleaned_data['content_object']
+        comment_content = comment_form.cleaned_data['comment_content']
+        comment = Comment(user=user, content_object=content_object, content=
+            comment_content)
+        comment.save()
+        data['status'] = 'SUCCESS'
+        data['username'] = comment.user.username
+        data['comment_time'] = comment.create_time.strftime('%Y-%m-%d %H:%M:%S')
+        data['comment_content'] = comment.content
 
-    user = request.session.get('user')
-    username = request.session.get('username')
-    password = request.session.get('password')
-    User = ContentType.objects.filter(model=user)[1].model_class()
-    user = User.objects.filter(username=username, password=password).first()
-    
-    content = request.POST.get('content','')
-    if not content:
-        return render(request, 'error.html',{'message':'内容为空',
-            'redirect_to':referer})
-    try:
-        object_id = int(request.POST.get('object_id'))
-        content_type = request.POST.get('content_type')
-        model_class = ContentType.objects.get(model=content_type).model_class()
-        content_object = model_class.objects.get(id=object_id)
-    except:
-        return render(request, 'error.html',{'message':'评论类型错误',
-            'redirect_to':referer})
-    
+    else:
+        data['status'] = 'ERROR'
+        # form.errors包括non_field_errors
+        data['message'] = list(comment_form.errors.values())[0]
 
-    comment = Comment(user=user, content_object=content_object,
-        content=content)
-    comment.save()
-    return redirect(referer)
+    return JsonResponse(data)
