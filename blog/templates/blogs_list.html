@@ -95,7 +95,7 @@
                     <ul>
                         {% for blog_date, nums in blog_date_dict.items %}
                             <li>
-                                <a href="{% url 'blogs_by_date' blog_date.year blog_date.month %}">{{ blog_date | date:"Y月m日" }}</a>({{ nums }})
+                                <a href="{% url 'blogs_by_date' blog_date.year blog_date.month %}">{{ blog_date | date:"Y年m月" }}</a>({{ nums }})
                             </li>
                         {% endfor %}
                     </ul>
