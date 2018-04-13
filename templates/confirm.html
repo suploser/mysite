@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirm Page</title>
+</head>
+<body>
+    <h3 style="">{{ message }}</h3>
+    <p><a href="{{referer}}">点击立即跳转</a></p>
+    <script>
+        window.setTimeout('window.location.href={{ referer }}', 2000);
+    </script>
+</body>
+</html>
