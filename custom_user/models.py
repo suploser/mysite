@@ -2,9 +2,21 @@ from django.db import models
 
 # Create your models here.
 class User(models.Model):
-    username = models.CharField(max_length=10)
+    username = models.CharField(max_length=60)
     email = models.EmailField()
-    password = models.CharField(max_length=10)
+    password = models.CharField(max_length=60)
+    has_confirmed = models.BooleanField(default=False)
 
     def __str__(self):
         return self.username
+
+class ConfirmString(models.Model):
+    token = models.CharField(max_length=250)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    reg_time = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username+','+self.token
+
+    class Meta:
+        ordering=['-reg_time']

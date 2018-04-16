@@ -1,10 +1,13 @@
 from datetime import timedelta
+from django.utils import timezone
 from django.shortcuts import render,redirect
+from django.conf import settings
 from django.urls import reverse
 from django.http import JsonResponse
-from custom_user.models import User
+from custom_user.models import User, ConfirmString
 from blog.models import Blog
 from .forms import loginForm, RegForm
+import utils
 
 def home(request):
     today_hot_blog_list, yesterday_hot_blog_list, hot_blog_list = \
@@ -47,10 +50,16 @@ def overall_regist(request):
         username = reg_form.cleaned_data['username']
         email = reg_form.cleaned_data['email']
         password = reg_form.cleaned_data['password']
+        password = utils.hash_token(password)
         user = User(username=username, password=password, email=email)
         user.save()
+        referer = request.META.get('HTTP_REFERER', reverse('home'))
+        #发送邮件
+        token = utils.make_confirm_string(username)
+        utils.send_confirm_email(email, token, referer)
+        ConfirmString.objects.create(user=user, token=token)
         data['status'] = 'Success'
-        data['referer'] = request.META.get('HTTP_REFERER', reverse('home'))
+        data['referer'] = referer
         return JsonResponse(data)
     data['status'] = 'Error'
     data['username_error'] = get_error('username', reg_form)
@@ -76,7 +85,6 @@ def login(request):
             return redirect(referer)
     return render(request, 'login.html', {'login_form':login_form,'referer':referer})
 
-
 def regist(request):
     regist_form = RegForm()
     if request.method == 'POST':
@@ -86,14 +94,41 @@ def regist(request):
             username = regist_form.cleaned_data['username']
             email = regist_form.cleaned_data['email']
             password = regist_form.cleaned_data['password']
+            #密码加密
+            password = utils.hash_token(password)
             user = User(username=username, email=email, password=password)
             user.save()
-            #跳回登录页
             referer = request.GET.get('from', reverse('home'))
-            login_url = reverse('login')
-            referer = login_url+'?from='+referer
-            return redirect(referer)
+            token = utils.make_confirm_string(user.username)
+            utils.send_confirm_email(email, token, referer)
+            ConfirmString.objects.create(user=user, token=token)
+            message = '注册成功, 请前往邮箱确认'
+            referer = 'http://127.0.0.1:8000'+referer
+            return render(request, 'confirm.html', {'message':message, 'referer':referer})
     return render(request, 'regist.html', {'regist_form':regist_form})
+
+def confirm(request):
+    token = request.GET.get('token')
+    referer = request.GET.get('from')
+    confirm = ConfirmString.objects.filter(token=token).first()
+    if not confirm:
+        message = '无效的链接'
+        referer = reverse('regist')+"?from="+referer
+        return render(request, 'confirm.html',{'message':message, 'referer':referer})
+    now = timezone.now()
+    reg_time = confirm.reg_time
+    if  now > reg_time + timedelta(days=settings.CONFIRM_DAYS):
+        confirm.user.delete()
+        message = '链接已过期,请重新注册!'
+        referer = reverse('regist')+"?from="+referer
+    else:
+        confirm.user.has_confirmed = True
+        confirm.user.save()
+        confirm.delete()
+        message = '注册成功,请到登录页登录,即将跳转至登录页!'
+        referer = reverse('login')+"?from="+referer
+    return render(request, 'confirm.html',{'message':message, 'referer':referer})
+
 
 def logout(request):
     referer = request.META.get('HTTP_REFERER',reverse('home'))
