@@ -1,5 +1,6 @@
 from django import forms
 from custom_user.models import User
+import utils
 
 class loginForm(forms.Form):
     username = forms.CharField(label='用户名',
@@ -17,9 +18,12 @@ class loginForm(forms.Form):
     def clean(self):
         username = self.cleaned_data.get('username','')
         password = self.cleaned_data.get('password','')
+        password = utils.hash_token(password)
         user = User.objects.filter(username=username, password=password).first()
         if not user:
             raise forms.ValidationError('用户名或密码错误')
+        elif not user.has_confirmed:
+            raise forms.ValidationError('用户尚未验证,请前往邮箱验证')
         else:
             self.cleaned_data['user'] = user
         return self.cleaned_data
