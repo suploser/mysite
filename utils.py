@@ -1,9 +1,6 @@
-import os
 from django.conf import settings
 
-# os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'
-
-def send_confirm_email(email, token, referer):
+def send_confirm_email(email, token, referer='/'):
     from django.core.mail import EmailMultiAlternatives
     subject = '注册确定邮件'
     text_content = '''
