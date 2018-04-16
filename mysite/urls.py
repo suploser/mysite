@@ -28,6 +28,7 @@ urlpatterns = [
     path('overall_regist/', views.overall_regist, name="overall_regist"),
     path('login/',views.login, name='login'),
     path('regist/', views.regist, name='regist'),
+    path('confirm/', views.confirm, name='confirm'),
     path('logout/', views.logout, name='logout'),
     path('comment/', include('comment.urls')),
 ]
