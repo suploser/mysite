@@ -1,14 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Confirm Page</title>
-</head>
-<body>
-    <h3 style="">{{ message }}</h3>
-    <p><a href="{{referer}}">点击立即跳转</a></p>
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}确认页{% endblock %}
+{% block header_extends %}
+    <link rel="stylesheet" href="{% static 'confirm.css' %}">
+{% endblock %}
+{% block content %}
+    <h3 class="message">{{ message }}</h3>
+    <p class="message"><a href="{{referer}}">点击立即跳转</a></p>
+{% endblock %}
+
+{% block scriptarea %}
     <script>
-        window.setTimeout('window.location.href={{ referer }}', 2000);
+        window.setTimeout('window.location.href="{{ referer }}"', 2000);
     </script>
-</body>
-</html>
+{% endblock %}
+    
