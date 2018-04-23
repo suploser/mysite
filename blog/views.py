@@ -63,17 +63,9 @@ def blog_detail(request, blog_id):
     previous_blog = Blog.objects.filter(created_time__gt=blog.created_time).last()
     next_blog = Blog.objects.filter(created_time__lt=blog.created_time).first()
     context={}
-    comments = Comment.objects.filter(content_type=blog_content_type, 
-        object_id=blog_id)
-    for comment in comments:
-        comment.create_time = comment.create_time.strftime('%Y-%m-%d %H:%M:%S')
-    from comment.forms import CommentForm
-    comment_form = CommentForm(initial={'content_type':'blog', 'object_id':blog_id})
     context['blog'] = blog
     context['previous_blog'] = previous_blog
     context['next_blog'] = next_blog
-    context['comment_form'] = comment_form
-    context['comments'] = comments
     response = render(request,'blog_detail.html', context=context)
     response.set_cookie(cookies_key, 'true')
     return response
