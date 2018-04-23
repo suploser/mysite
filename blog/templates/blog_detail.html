@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+{% load custom_tags %}
 {% block title %}{{ blog.title }}{% endblock %}
 {% block blogs_list_active %}active{% endblock %}
 {% block header_extends %}<link rel="stylesheet" href={% static 'blog.css' %}> {% endblock %}
@@ -12,7 +13,8 @@
             <ul class="blog-info">
                 <li>作者: {{ blog.author }}</li>
                 <li>分类: <a href={% url 'blogs_by_type' blog.blog_type.id %}>{{ blog.blog_type }}</a></li>
-                <li>发表时间: {{ blog.created_time | date:"Y-m-d" }}&nbsp;&nbsp;&nbsp;&nbsp;阅读:{{ blog.get_read_num }}</li>
+                <li>发表时间: {{ blog.created_time | date:"Y-m-d" }}&nbsp;&nbsp;&nbsp;&nbsp;阅读:{{ blog.get_read_num }}&nbsp;&nbsp;&nbsp;&nbsp;评论:{% get_comment_count blog %}
+                </li>
             </ul>
             <div class="blog-content">{{ blog.content | safe }}</div>
             <!-- {% autoescape off %}{{ blog.content }}{% endautoescape %} -->
@@ -39,6 +41,12 @@
                 <form id="comment-form" action="{% url 'update_comment' %}" method="POST" style="overflow:hidden;">
                     {% csrf_token %}
                     <label>{{ request.session.username }}~,欢迎评论！！</label>
+                    <div id="reply-content-container" style="display: none">
+                        <p>回复:</p>
+                        <div id="reply-content">
+                        </div>
+                    </div>
+                    {% get_comment_form blog as comment_form %}
                     {% for field in comment_form %}
                         {{ field }}
                     {% endfor %}
@@ -53,8 +61,25 @@
         <div class="comment-area">
             <h3 class="comment-area-title">评论列表</h3>
             <span id='comment-list'>
+            {% get_comments blog as comments %}
             {% for comment in comments %}
-                <div>{{comment.user}}&nbsp;({{comment.create_time}}):&nbsp;{{ comment.content | safe}}</div>
+                <div id="root-{{ comment.id }}" class="comment">
+                    {{comment.user}}&nbsp;({{comment.create_time | date:"Y-m-d H:i:s"}}):&nbsp;
+                    <div id="comment-{{ comment.id }}">
+                        {{ comment.content | safe}}
+                    </div>
+                    <a href="javascript:reply({{ comment.id }});">回复</a>
+                    {% for reply in comment.root_comment.all %}
+                    <div class="reply">
+                        {{ reply.user.username }}&nbsp;({{ reply.create_time | date:"Y-m-d H:i:s" }})回复:{{ reply.reply_to.username }}&nbsp;
+                        <div id="comment-{{ reply.id }}">
+                            {{ reply.content | safe }}
+                        </div>
+                        <a href="javascript:reply({{ reply.id }});">回复</a>
+                    </div>
+                    {% endfor %}
+                </div>
+               
             {% empty %}
                 <div id="point">暂无评论！</div>
             {% endfor %}
@@ -70,7 +95,6 @@
 {% block scriptarea %}
     <script type="text/javascript">
     $("#comment-form").submit(function(){
-        $('#point').text('')
         $('#comment-error').text('')
         // 更新评论内容到textarea
         CKEDITOR.instances.id_comment_content.updateElement();
@@ -78,7 +102,7 @@
         if(CKEDITOR.instances.id_comment_content.document.getBody().getText().trim()==''){
             $('#comment-error').text('评论内容不能为空');
             return false;
-        }
+        };
         $.ajax({
         url: "{% url 'update_comment' %}",
         type: "POST",
@@ -87,9 +111,18 @@
         success: function(data){
             console.log(data.status);
             if(data.status == 'SUCCESS'){
-                $('#point').text()
-                var comment_html = '<div>'+data.username+' ('+ data.comment_time+ ') :'+data.comment_content+'</div>';
-                $('#comment-list').prepend(comment_html);
+                $('#point').remove();
+                if($('#reply_comment_id').val() == '0'){
+                    //root评论
+                 var comment_html = '<div id="root-'+data.id+'" class="comment">'+data.username+' '+(data.comment_time)+':<div id="comment-'+data.id+'">'+data.comment_content+'</div><a href="javascript:reply('+data.id+');">回复</a></div>' ;
+                 $('#comment-list').prepend(comment_html);
+                }else{
+                    //回复
+                 var reply_html = '<div class="reply">'+data.username+' '+'('+data.comment_time+')'+'回复:'+data.reply_to+'<div id="comment-'+data.id+'">'+data.comment_content+'</div><a href="javascript:reply('+data.id+');">回复</a></div>';
+                 $('#root-'+data.root_id).append(reply_html)
+                }
+                $('#reply-content-container').hide();
+                $('#reply_comment_id').val('0');
                 CKEDITOR.instances.id_comment_content.setData('')
             }else{
                 $('#comment-error').text(data.message)
@@ -102,6 +135,16 @@
 
         return false;
     });
+    function reply(reply_comment_id){
+        $('#reply_comment_id').val(reply_comment_id);
+        var html = $('#comment-'+reply_comment_id).html();
+        $('#reply-content').html(html);
+        $('#reply-content-container').show();
+        // 聚焦到评论框
+        $('html').animate({scrollTop: $('#comment-form').offset().top - 60}, 300, function(){
+            CKEDITOR.instances.id_comment_content.focus();
+        })
+    }
 </script>
 {% endblock %}
 
