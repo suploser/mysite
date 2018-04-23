@@ -6,14 +6,21 @@ from custom_user.models import User
 
 class Comment(models.Model):
     content_type = models.ForeignKey(ContentType, 
-        on_delete=models.DO_NOTHING)
+        on_delete=models.CASCADE)    
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 
         'object_id')
-    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, related_name='comment_user', 
+        on_delete=models.CASCADE)
+    root = models.ForeignKey('self', related_name='root_comment',
+        null=True, on_delete=models.CASCADE)    
+    parent = models.ForeignKey('self', related_name='parent_comment', 
+        null=True, on_delete=models.CASCADE)   
+    reply_to = models.ForeignKey(User, related_name='reply_user', 
+        null=True, on_delete=models.CASCADE)   
     content = models.TextField()
     create_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-create_time']
+        ordering = ['create_time']
 
