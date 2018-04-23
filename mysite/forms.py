@@ -5,13 +5,13 @@ import utils
 class loginForm(forms.Form):
     username = forms.CharField(label='用户名',
         widget=forms.TextInput(
-            attrs={'id':'login-username', 'class':'form-control'}),
+            attrs={'id':'login-username', 'class':'form-control','placeholder':"请输入用户名"}),
         error_messages={'required':'用户名不能为空'}
         )
     password = forms.CharField(
         label='密码', 
         widget=forms.PasswordInput(
-            attrs={'id':'login-password','class':'form-control'}),
+            attrs={'id':'login-password','class':'form-control','placeholder':"请输入密码"}),
         error_messages={'required':'密码不能为空'}
         )
 
@@ -33,17 +33,17 @@ class RegForm(forms.Form):
         label='用户名', 
         min_length=6, max_length=20,
         widget=forms.TextInput(
-            attrs={'id':'reg-username', 'class':'form-control'}),
+            attrs={'id':'reg-username', 'class':'form-control','placeholder':"请输入用户名"}),
         # error_messages={'required':'用户名不能为空'}
         )
     email = forms.EmailField(label='邮箱',
-        widget=forms.EmailInput(attrs={'id':'email', 'class':'form-control'}))
+        widget=forms.EmailInput(attrs={'id':'email', 'class':'form-control','placeholder':"请输入邮箱"}))
     password = forms.CharField(label='密码',
         max_length=20, min_length=8,
-        widget=forms.PasswordInput(attrs={'class':'form-control reg-password'}))
+        widget=forms.PasswordInput(attrs={'class':'form-control reg-password','placeholder':"请输入密码"}))
     password_again = forms.CharField(label='再一次输入密码',
         max_length=20, min_length=8,
-        widget=forms.PasswordInput(attrs={'class':'form-control reg-password'}))
+        widget=forms.PasswordInput(attrs={'class':'form-control reg-password','placeholder':"请再输入一次密码"}))
 
     def clean_username(self):
         username = self.cleaned_data['username']
