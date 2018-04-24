@@ -51,3 +51,10 @@ div .comment {
 div.reply {
     margin-left: 2em
 }
+
+div#reply-content-container {
+    padding: 0.5em 1em;
+    background: #f8f8f8;
+    border: 1px solid #d1d1d1;
+    border-bottom:none;
+}
