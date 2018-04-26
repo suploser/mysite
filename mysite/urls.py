@@ -31,6 +31,7 @@ urlpatterns = [
     path('confirm/', views.confirm, name='confirm'),
     path('logout/', views.logout, name='logout'),
     path('comment/', include('comment.urls')),
+    path('ueditor/', include('ueditor.urls')),
 ]
 # 关联MEDIA_URL和MEDIA_ROOT
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
