@@ -58,8 +58,11 @@ def buildFileName(pathformat, filename):
 
 #读取json文件
 def getConfigContent():
-    jsonfile = file(config_path)
+    # jsonfile = file(config_path)
+    f = open(config_path, 'r')
+    jsonfile = f
     content = json.load(jsonfile)
+    f.close()
     return content
 
 #上传配置类
