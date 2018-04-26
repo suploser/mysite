@@ -1,0 +1,10 @@
+{% extends 'confirm.html' %}
+{% block title %}错误页{% endblock %}
+{% block content %}
+    <h3 class="message">{{ message }}</h3>
+{% endblock %}
+{% block scriptarea %}
+    <script>
+        window.setTimeout('window.location.href="/"', 2000);
+    </script>
+{% endblock %}
