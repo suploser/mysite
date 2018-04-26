@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'read_statistics',
     'comment',
     'custom_user',
+    'ueditor',
 ]
 
 MIDDLEWARE = [
