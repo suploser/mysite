@@ -21,8 +21,8 @@ def deal_common(request, blogs):
         page_range.insert(0, 1)
     if page_range[-1] != paginator.num_pages:
         page_range.append(paginator.num_pages)
-    # blog_types = BlogType.objects.all()   
-    blog_types = BlogType.objects.annotate(Count('blog'))
+    blog_types = BlogType.objects.all()   
+    # blog_types = BlogType.objects.annotate(Count('blog'))
     blog_date_list = Blog.objects.dates('created_time', 'month', 'DESC')
     blog_date_dict = {}
     for blog_date in blog_date_list:
@@ -44,7 +44,7 @@ def blogs_list(request):
 def blogs_by_type(request, blog_type_id):
     blog_type = get_object_or_404(BlogType, pk=blog_type_id)
     # blogs = Blog.objects.filter(blog_type=blog_type_id)
-    blogs = Blog.objects.filter(blog_type=blog_type)
+    blogs = blog_type.blog_set.all()
     context = deal_common(request, blogs)
     context['blog_type'] = blog_type
     return render(request,'blogs_by_type.html', context=context)
@@ -69,3 +69,54 @@ def blog_detail(request, blog_id):
     response = render(request,'blog_detail.html', context=context)
     response.set_cookie(cookies_key, 'true')
     return response
+
+#判断用户是否为管理员的装饰器
+def check_admin(func):
+    def wrapper(request):
+        if request.session.get('username'):
+            if request.session.get('is_supuser'):
+                return func(request)
+        message = '您不是管理员,无法发表博客'
+        return render(request, 'message.html', {'message':message})
+    return wrapper
+
+@check_admin
+def blog_add(request):
+    if request.method == 'POST':
+        data = {}
+        title = request.POST.get('blog_title')
+        blog_type = request.POST.getlist('tag')
+        content = request.POST.get('content')
+        from custom_user.models import User
+        author = User.objects.filter(is_supuser=True).first()
+        blog_type_list = []
+        for tag in blog_type:
+            blog_type_id = int(tag)
+            blog_type_list.append(blog_type_id)
+
+        try:
+            if len(title) <=0 or len(title)>=50:
+                raise Exception('请输入一个不超过50个字符的标题')
+            if len(blog_type_list) == 0:
+                raise Exception('请选择至少一个分类')
+            if len(content) == 0:
+                raise Exception('请输入博客内容')
+            blog = Blog()
+            blog.title = title
+            blog.content = content
+            blog.author = author
+            blog.save()
+            #ManyToManyField保存方式
+            for blog_type in BlogType.objects.filter(id__in=blog_type_list):
+                blog.blog_type.add(blog_type)
+
+            data['status'] = 'Success'
+            from django.urls import reverse
+            data['message'] = reverse('blog_detail', args=[blog.id,])
+        except Exception as e:
+            data['status'] = 'Fail'
+            data['message'] = e
+        from django.http import JsonResponse
+        return JsonResponse(data)
+
+    return render(request, 'blog_add.html')
