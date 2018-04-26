@@ -33,6 +33,7 @@ def overall_login(request):
         request.session.set_expiry(0)
         request.session['username'] = user.username
         request.session['password'] = user.password
+        request.session['is_supuser'] = user.is_supuser
         request.session['user'] = 'user'
         data['status'] = 'Success'
         data['referer'] = request.META.get('HTTP_REFERER', reverse('home'))
@@ -80,6 +81,7 @@ def login(request):
             request.session.set_expiry(0)
             request.session['username'] = user.username
             request.session['password'] = user.password
+            request.session['is_supuser'] = user.is_supuser
             request.session['user'] = 'user'
             
             return redirect(referer)
