@@ -7,7 +7,7 @@ class BlogAdmin(admin.ModelAdmin):
 
 @admin.register(Blog)
 class BlogTypeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'blog_type', 'get_read_num', 'author',\
+    list_display = ('id', 'title', 'get_read_num', 'author',\
         'created_time', 'last_update_time',)
     '''
 @admin.register(ReadNum)
