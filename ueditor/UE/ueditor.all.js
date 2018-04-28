@@ -13264,8 +13264,8 @@ UE.plugins['insertcode'] = function() {
 
                     });
                 }
-                me.execCommand('inserthtml','<pre id="coder"class="brush:'+lang+';toolbar:false">'+code+'</pre>',true);
-
+                // me.execCommand('inserthtml','<pre id="coder"class="brush:'+lang+';toolbar:false">'+code+'</pre>',true);
+                me.execCommand('inserthtml','<pre id="coder"class="prettyprint linenums">'+code+'</pre>',true);
                 pre = me.document.getElementById('coder');
                 domUtils.removeAttributes(pre,'id');
                 var tmpNode = pre.previousSibling;
