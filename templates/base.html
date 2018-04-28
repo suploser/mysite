@@ -7,6 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'base.css' %}">
+    <link rel="stylesheet" href="/static/css/prettify.css">
+    <!-- <link rel="stylesheet" href="/static/css/prism.css"> -->
+    <!-- <script tyep="text/javascript" src="/static/js/prism.js"></script> -->
+    <script tyep="text/javascript" src="/static/js/prettify.js"></script>
     <link rel="stylesheet" type="text/css" href="{%  static 'bootstrap-3.3.7-dist/css/bootstrap.min.css' %}">  
     {% block header_extends %}{% endblock %}
 </head>
@@ -205,6 +209,8 @@
 
         });
       });
+      prettyPrint();
+      
     </script>
     {% block scriptarea %}{% endblock %}
 </body> 
