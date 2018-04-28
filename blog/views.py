@@ -10,7 +10,7 @@ def deal_common(request, blogs):
     page_num = int(request.GET.get('page', 1))
     paginator = Paginator(blogs, settings.EACH_PAGE_BLOG_NUMS)
     page_of_blogs = paginator.get_page(page_num)
-    #分页
+    #分页逻辑
     page_range = list(range(max(page_num-2, 1), page_num))+\
     list(range(page_num, min(page_num+2, paginator.num_pages)+1))
     if page_range[0]-1 >= 2:
@@ -106,12 +106,13 @@ def blog_add(request):
             blog.content = content
             blog.author = author
             blog.save()
-            #ManyToManyField保存方式
+            #ManyToManyField保存方式,不用save方法
             for blog_type in BlogType.objects.filter(id__in=blog_type_list):
                 blog.blog_type.add(blog_type)
 
             data['status'] = 'Success'
             from django.urls import reverse
+            #发表后跳转至该博客页
             data['message'] = reverse('blog_detail', args=[blog.id,])
         except Exception as e:
             data['status'] = 'Fail'
