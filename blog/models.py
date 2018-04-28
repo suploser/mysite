@@ -19,6 +19,7 @@ class Blog(models.Model, ReadNumExpand):
     blog_type = models.ManyToManyField(BlogType)    
     # read_nums = models.IntegerField(default=0)
     content = RichTextUploadingField()
+    # content = models.TextField()
     read_num_obj = GenericRelation(ReadNums)
     author = models.ForeignKey(User, on_delete=models.CASCADE)    
     created_time = models.DateTimeField(auto_now_add=True)
