@@ -1,0 +1,81 @@
+{% extends 'blog_add.html' %}
+{% load staticfiles %}
+{% block title %}修改博文{% endblock %}
+{% block script_area %}
+<script type="text/javascript">
+        var ue = UE.getEditor('editor');
+        ue.ready(function(){
+             $.ajax({
+                url:"{% url 'ajax_get_content' blog.id %}",
+                data:{},
+                type:'GET',
+                cache:false,
+                success: function(data){
+                    if(data.status='Success'){
+                        var content = data.message;
+                        ue.setContent(content);
+                    }else{
+                        $('.tip-text').text(data.message);
+                    }
+                },
+                error: function(xhr){
+                    $('.tip-text').text('内部错误,请稍后再试!')
+                },
+                });
+        })
+    </script>
+{% endblock %}
+{% block value %}value="{{ blog.title }}"{% endblock %}
+{% block load_area %}{% endblock %}
+{% block check %}{% if tag.checked %}checked{% endif %}{% endblock %}
+{% block scriptarea %}<script>
+    // 前端验证数据
+    function check_data(){
+        $('.tip-text').text('');
+        var title = $('#blog_title').val();
+        if(title.length<=0 || title.length>=50){
+            $('.tip-text').text('请输入一个不超过50个字符的标题');
+            return false;
+        }
+        if($('input[name=tag]:checked').length == 0){
+            $('.tip-text').text('请选择至少一个分类');
+            return false;
+        }
+        if(!UE.getEditor('editor').hasContents()){
+            $('.tip-text').text('请输入博客内容');
+            return false;
+        }
+        return true;
+    }
+    $('#blog_submit').click(
+        function(){
+            if(!check_data()){
+                return ;
+            }
+            $('.tip-text').text('发表博客中......');
+            $('#blog_submit').addClass('disabled');
+            var ue = UE.getEditor('editor');
+            $('#content').val(ue.getContent());
+            var data = $('#blog_add').serialize();
+            $.ajax({
+                url: '{% url "edit_ajax_add" blog.id %}',
+                type:'POST',
+                data: data,
+                cache: false,
+                success: function(data){
+                    if(data.status == 'Success'){
+                        $('.tip-text').text('修改成功,即将前往博客页面')
+                        window.location.href = data.message;
+                    }else{
+                        $('.tip-text').text('修改博客出错'+data.message);
+                    }
+                },
+                error: function(xhr){
+                    console.log(xhr);
+                    $('.tip-text').text('修改博文出错,请稍后再试!');
+                }
+            });
+            $('#blog_submit').removeClass('disabled');
+        });
+</script>
+{% endblock %}
