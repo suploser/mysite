@@ -11,9 +11,8 @@
     
     <script type="text/javascript">
         var ue = UE.getEditor('editor');
-       
-        
     </script>
+    {% block script_area %}{% endblock %}
 {% endblock %}
 {% block content %}
 <div class="container">
@@ -23,17 +22,17 @@
         <div class="row">
             <div class="col-md-1 col-md-offset-2" style="margin-top: 0.5em">博文标题</div>
             <div class="col-md-7">
-            <input id="blog_title" type="text" name="blog_title" class="form-control" placeholder="请写入不超过50个字符的标题">
+            <input id="blog_title" type="text" {% block value %}{% endblock %} name="blog_title" class="form-control" placeholder="请写入不超过50个字符的标题">
             </div>
         </div><br>
         <div class="row">
             <div class="col-md-1 col-md-offset-2">博客分类</div>
             <div class="col-md-7">
                 <ul style="overflow: hidden;">
-                    {% get_blog_type as tags %}
+                    {% block load_area %}{% get_blog_type as tags %}{% endblock %}
                     {% for tag in tags %}
                     <li style="display: inline-block;">
-                        <input id="tag_{{tag.id}}" type="checkbox" name="tag" value="{{tag.id}}">
+                        <input id="tag_{{tag.id}}" type="checkbox" name="tag" value="{{tag.id}}" {% block check %}{% endblock %}>
                          <label for="tag_{{tag.id}}">{{tag.type_name}}</label>
                     </li>&nbsp;
 
@@ -83,7 +82,7 @@
                 return ;
             }
             $('.tip-text').text('发表博客中......');
-
+            $('#blog_submit').addClass('disabled');
             var ue = UE.getEditor('editor');
             $('#content').val(ue.getContent());
             var data = $('#blog_add').serialize();
@@ -104,8 +103,8 @@
                     console.log(xhr);
                     $('.tip-text').text('发表博文出错,请稍后再试!');
                 }
-
             });
+            $('#blog_submit').removeClass('disabled');
         });
 </script>
 {% endblock %}
