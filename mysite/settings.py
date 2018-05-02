@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'comment',
     'custom_user',
     'ueditor',
+    'favor',
 ]
 
 MIDDLEWARE = [
