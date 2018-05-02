@@ -2,9 +2,7 @@
 {% load staticfiles %}
 {% load blog_custom_tags %}
 {% block title %}添加博文{% endblock %}
-{% block header_extends %}
-    
-    
+{% block header_extends %} 
     <script type="text/javascript" src="/ueditor/UE/ueditor.config.js"></script>
     <script type="text/javascript" src="/ueditor/UE/ueditor.all.js"></script>
     <script type="text/javascript" src="/ueditor/UE/lang/zh-cn/zh-cn.js"></script>
@@ -12,7 +10,6 @@
     <script type="text/javascript">
         var ue = UE.getEditor('editor');
     </script>
-    {% block script_area %}{% endblock %}
 {% endblock %}
 {% block content %}
 <div class="container">
@@ -22,20 +19,20 @@
         <div class="row">
             <div class="col-md-1 col-md-offset-2" style="margin-top: 0.5em">博文标题</div>
             <div class="col-md-7">
-            <input id="blog_title" type="text" {% block value %}{% endblock %} name="blog_title" class="form-control" placeholder="请写入不超过50个字符的标题">
+            <input id="blog_title" type="text" name="blog_title" class="form-control" placeholder="请写入不超过50个字符的标题">
             </div>
         </div><br>
         <div class="row">
             <div class="col-md-1 col-md-offset-2">博客分类</div>
             <div class="col-md-7">
                 <ul style="overflow: hidden;">
-                    {% block load_area %}{% get_blog_type as tags %}{% endblock %}
+                    
+                    {% get_blog_type as tags %}
                     {% for tag in tags %}
                     <li style="display: inline-block;">
-                        <input id="tag_{{tag.id}}" type="checkbox" name="tag" value="{{tag.id}}" {% block check %}{% endblock %}>
+                        <input id="tag_{{tag.id}}" type="checkbox" name="tag" value="{{tag.id}}">
                          <label for="tag_{{tag.id}}">{{tag.type_name}}</label>
                     </li>&nbsp;
-
                     {% endfor %}
                 </ul>
             </div>
