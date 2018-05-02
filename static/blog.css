@@ -17,9 +17,10 @@ div.blog:not(:last-child){
 div.blog h3{
     margin-top: 0.5em; 
 }
-/*div.blog-content {
-    text-indent: 0em; 
-}*/
+div.blog-content {
+    /*text-indent: 0em; */
+    margin-bottom: 2em; 
+}
 p.blog-info {
     margin-top: 2em;
 }
@@ -57,4 +58,15 @@ div#reply-content-container {
     background: #f8f8f8;
     border: 1px solid #d1d1d1;
     border-bottom:none;
+}
+
+div.favor {
+    color: #23527c;
+    cursor: pointer;
+    display: inline-block;
+    margin-left: 0.5em;
+}
+
+span.active {
+    color: red;
 }
