@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load custom_tags %}
+{% load favor_tags %}
 {% block title %}{{ blog.title }}{% endblock %}
 {% block blogs_list_active %}active{% endblock %}
 {% block header_extends %}<link rel="stylesheet" href={% static 'blog.css' %}> {% endblock %}
@@ -28,6 +29,11 @@
                     </div>
                    <!--  {% autoescape off %}<div class="blog-content">{{ blog.content}}
                     </div>{% endautoescape %} -->
+                    <div class="favor" onclick="favor_count(this, 'blog', {{ blog.id }})">
+                        <span class="glyphicon glyphicon-thumbs-up {% get_favor_status blog request %}"></span>
+                        <span class="favor_num">{% get_favor_num blog %}</span>
+                        <span>喜欢</span>
+                    </div>
                     <div class="blog-more">
                         {% if previous_blog %}
                             <p>上一篇:<a href="{% url 'blog_detail' previous_blog.id %}">{{ previous_blog.title }}</a></p>
@@ -86,6 +92,9 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h3 class="comment-area-title">评论列表</h3>
+                        {% if not request.session.username %}
+                            <span>登录后方可回复</span>
+                        {% endif %}
                     </div>
                     <div class="panel-body">
                         <span id='comment-list'>
@@ -96,12 +105,21 @@
                                 <div id="comment-{{ comment.id }}">
                                     {{ comment.content | safe}}
                                 </div>
+                                <div class="favor" onclick="favor_count(this, 'comment', {{ comment.id }})">
+                                    <span class="glyphicon glyphicon-thumbs-up {% get_favor_status comment request %}"></span>
+                                    <span class="favor_num">{% get_favor_num comment %}</span>
+                                    
+                                </div>
                                 <a href="javascript:reply({{ comment.id }});">回复</a>
                                 {% for reply in comment.root_comment.all %}
                                 <div class="reply">
                                     <span id="user-{{reply.id}}">{{ reply.user.username }}</span>&nbsp;({{ reply.create_time | date:"Y-m-d H:i:s" }})回复: <span>{{reply.reply_to.username }}</span>&nbsp;
                                     <div id="comment-{{ reply.id }}">
                                         {{ reply.content | safe }}
+                                    </div>
+                                    <div class="favor" onclick="favor_count(this, 'comment', {{ reply.id }})">
+                                        <span class="glyphicon glyphicon-thumbs-up {% get_favor_status reply request %}"></span>
+                                        <span class="favor_num">{% get_favor_num reply %}</span>
                                     </div>
                                     <a href="javascript:reply({{ reply.id }});">回复</a>
                                 </div>
@@ -144,11 +162,14 @@
                 $('#point').remove();
                 if($('#reply_comment_id').val() == '0'){
                     //root评论
-                 var comment_html = '<div id="root-'+data.id+'" class="comment"><span id="'+data.id+'">'+data.username+' </span>'+'('+data.comment_time+')'+':<div id="comment-'+data.id+'">'+data.comment_content+'</div><a href="javascript:reply('+data.id+');">回复</a></div>' ;
+                    // $('a').parent(selctor)
+                var comment_html = '<div id="root-'+data.id+'" class="comment"><span id="user-'+data.id+'">'+data.username+' </span>'+'('+data.comment_time+')'+':<div id="comment-'+data.id+'">'+data.comment_content+'</div><div class="favor" onclick="favor_count(this,'+"'comment',"+data.id+')"><span class="glyphicon glyphicon-thumbs-up"></span><span class="favor_num">&nbsp;0&nbsp;</span></div><a href="javascript:reply('+data.id+');">回复</a></div>';
+
                  $('#comment-list').prepend(comment_html);
                 }else{
                     //回复
-                 var reply_html = '<div class="reply"><span id="'+data.id+'">'+data.username+'</span> '+'('+data.comment_time+')'+'回复:<span>'+data.reply_to+'</span><div id="comment-'+data.id+'">'+data.comment_content+'</div><a href="javascript:reply('+data.id+');">回复</a></div>';
+                    // $('a').parent(selctor)
+                 var reply_html = '<div class="reply"><span id="user-'+data.id+'">'+data.username+'</span> '+'('+data.comment_time+')'+'回复:<span>'+data.reply_to+'</span><div id="comment-'+data.id+'">'+data.comment_content+'</div><div class="favor" onclick="favor_count(this,'+"'comment',"+data.id+')"><span class="glyphicon glyphicon-thumbs-up"></span><span class="favor_num">&nbsp;0&nbsp;</span></div><a href="javascript:reply('+data.id+');">回复</a></div>';
                  $('#root-'+data.root_id).append(reply_html)
                 }
                 $('#reply-content-container').hide();
@@ -181,6 +202,37 @@
     //取消回复
     function cancel(){
         $('#reply-content-container').hide();
+        CKEDITOR.instances.id_comment_content.setData('');
+    }
+    function favor_count(obj, content_type, object_id){
+        // 判断是否存在class=active的标签
+        is_active = $(obj).children('.active').length != 0;
+        $.ajax({
+            url:"{% url 'favor_count' %}",
+            type: 'GET',
+            data:{
+                'content_type':content_type,
+                'object_id':object_id,
+                'is_active':is_active,
+            },
+            cache: false,
+            success: function(data){
+                // console.log(data);
+                if(data.status=='Success'){
+                    if(!is_active){
+                        $(obj).children('.glyphicon').addClass('active');       
+                    }else{
+                        $(obj).children('.glyphicon').removeClass('active');  
+                    }
+                    $(obj).children('.favor_num').html('&nbsp;'+data.message+'&nbsp;');
+                }else{
+                    console.log(data);
+                }
+            },
+            error: function(xhr){
+
+            }
+        });
     }
 </script>
 {% endblock %}
