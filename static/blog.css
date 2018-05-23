@@ -9,7 +9,7 @@ ul.blog-info li {
     display: inline-block;
     margin-right: 2em
 }
-/*该类的最后一个div不执行*/
+/*该类的最后一个div节点不执行*/
 div.blog:not(:last-child){
     margin-bottom: 2em;
     border-bottom: 1px solid #ccc
@@ -45,9 +45,10 @@ div.django-ckeditor-widget {
     width:100%;
 }
 
-div .comment {
+div .comment{
     border-bottom: 1px dashed;
-    margin-bottom: 2em
+    padding-bottom: 2em;
+    padding-top: 1em;
 }
 div.reply {
     margin-left: 2em

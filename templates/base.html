@@ -11,6 +11,8 @@
     <!-- <link rel="stylesheet" href="/static/css/prism.css"> -->
     <!-- <script tyep="text/javascript" src="/static/js/prism.js"></script> -->
     <script tyep="text/javascript" src="/static/js/prettify.js"></script>
+    <script src="{% static 'jquery1.12.4.min.js' %}"></script>
+    <script src="{% static 'bootstrap-3.3.7-dist/js/bootstrap.min.js' %}"></script>
     <link rel="stylesheet" type="text/css" href="{%  static 'bootstrap-3.3.7-dist/css/bootstrap.min.css' %}">  
     {% block header_extends %}{% endblock %}
 </head>
@@ -35,7 +37,7 @@
                     <div class="btn-group">
                       <button type="button" id="info" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">您好,{{ request.session.username }} <span class="caret"></span></button>
                       <ul class="dropdown-menu">
-                        <li><a href="javascript:void(0);">个人中心</a></li>
+                        <li><a href="{% url 'user_info' %}">个人中心</a></li>
                         {% if request.session.is_supuser %}
                         <li><a href="{% url 'blog_add' %}">发表博文</a></li>
                         {% endif %}
@@ -120,8 +122,6 @@
            </div> 
         </div>
     </div>
-    <script src="{% static 'jquery1.12.4.min.js' %}"></script>
-    <script src="{% static 'bootstrap-3.3.7-dist/js/bootstrap.min.js' %}"></script>
     <script>
         $('#login').on('show.bs.modal', function(){
           $('#login-username').val('');
