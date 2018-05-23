@@ -24,15 +24,10 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('blog/', include('blog.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
-    path('overall_login/', views.overall_login, name="overall_login"),
-    path('overall_regist/', views.overall_regist, name="overall_regist"),
-    path('login/',views.login, name='login'),
-    path('regist/', views.regist, name='regist'),
-    path('confirm/', views.confirm, name='confirm'),
-    path('logout/', views.logout, name='logout'),
     path('comment/', include('comment.urls')),
     path('ueditor/', include('ueditor.urls')),
     path('favor/', include('favor.urls')),
+    path('user/', include('custom_user.urls')),
 ]
 # 关联MEDIA_URL和MEDIA_ROOT
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
