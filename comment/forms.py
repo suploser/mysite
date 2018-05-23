@@ -14,6 +14,7 @@ class CommentForm(forms.Form):
     reply_comment_id = forms.IntegerField(widget=forms.HiddenInput(attrs=
         {'id':'reply_comment_id'}))
 
+    # 获取session
     def __init__(self, *args, **kwords):
         if 'session' in kwords:
             self.session = kwords.pop('session')
