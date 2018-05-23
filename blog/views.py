@@ -32,6 +32,7 @@ def deal_common(request, blogs):
         blog_nums = Blog.objects.filter(created_time__year=blog_date.year
             ,created_time__month=blog_date.month).count()
         blog_date_dict[blog_date] = blog_nums
+    # 对blog_date_dict按key排序？？
     context = {}
     context['page_range'] = page_range
     context['blogs'] = page_of_blogs
