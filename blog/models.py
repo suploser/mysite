@@ -23,6 +23,7 @@ class Blog(models.Model, ReadNumExpand):
     read_num_obj = GenericRelation(ReadNums)
     author = models.ForeignKey(User, on_delete=models.CASCADE)    
     created_time = models.DateTimeField(auto_now_add=True)
+    # 修改后自动更新
     last_update_time = models.DateTimeField(auto_now=True)
 
     def __str__(self):
