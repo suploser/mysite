@@ -9,7 +9,7 @@ ul.blog-info li {
     display: inline-block;
     margin-right: 2em
 }
-/*该类的最后一个div不执行*/
+/*该类的最后一个div节点不执行*/
 div.blog:not(:last-child){
     margin-bottom: 2em;
     border-bottom: 1px solid #ccc
@@ -18,7 +18,8 @@ div.blog h3{
     margin-top: 0.5em; 
 }
 div.blog-content {
-    text-indent: 2em; 
+    /*text-indent: 0em; */
+    margin-bottom: 2em; 
 }
 p.blog-info {
     margin-top: 2em;
@@ -37,9 +38,36 @@ div.comment-area {
 }
 
 h3.comment-area-title {
-    border-bottom: 1px solid #ccc
+    /*border-bottom: 1px solid #ccc*/
 }
 
 div.django-ckeditor-widget {
     width:100%;
+}
+
+div .comment{
+    border-bottom: 1px dashed;
+    padding-bottom: 2em;
+    padding-top: 1em;
+}
+div.reply {
+    margin-left: 2em
+}
+
+div#reply-content-container {
+    padding: 0.5em 1em;
+    background: #f8f8f8;
+    border: 1px solid #d1d1d1;
+    border-bottom:none;
+}
+
+div.favor {
+    color: #23527c;
+    cursor: pointer;
+    display: inline-block;
+    margin-left: 0.5em;
+}
+
+span.active {
+    color: red;
 }

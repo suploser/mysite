@@ -14,10 +14,20 @@ def update_comment(request):
         comment_content = comment_form.cleaned_data['comment_content']
         comment = Comment(user=user, content_object=content_object, content=
             comment_content)
+        parent = comment_form.cleaned_data['parent']
+        if parent:
+            comment.root = parent.root if parent.root else parent
+            comment.parent = parent
+            comment.reply_to = parent.user
         comment.save()
         data['status'] = 'SUCCESS'
         data['username'] = comment.user.username
-        data['comment_time'] = comment.create_time.strftime('%Y-%m-%d %H:%M:%S')
+        data['reply_to'] = comment.reply_to.username if parent else ''
+        data['id'] = comment.id
+        data['root_id'] = comment.root.id if parent else ''
+        from datetime import datetime
+        #时区转换
+        data['comment_time'] = datetime.fromtimestamp(comment.create_time.timestamp()).strftime('%Y-%m-%d %H:%M:%S')
         data['comment_content'] = comment.content
 
     else:

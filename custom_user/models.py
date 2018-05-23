@@ -5,6 +5,7 @@ class User(models.Model):
     username = models.CharField(max_length=60)
     email = models.EmailField()
     password = models.CharField(max_length=60)
+    is_supuser = models.BooleanField(default=False)
     has_confirmed = models.BooleanField(default=False)
 
     def __str__(self):

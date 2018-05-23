@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}个人中心{% endblock %}
+{% block header_extends %}<link rel="stylesheet" href="{% static 'css/user_info.css' %}">{% endblock %}
+{% block content %}
+{% if request.session.username %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-5 col-md-offset-1">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span>个人信息</span>
+                </div>
+                <div class="panel-body">
+                    <ul class="user-info">
+                        <li>昵称: </li>
+                        <li>用户名：{{ request.session.username }}</li>
+                        <li>邮箱: {{ request.session.email }}&nbsp;&nbsp;<a href="#">更换邮箱</a></li>
+                        <li>上次登录时间: {{ request.session.last_login_time }}</li>
+                        <li><a href="#">修改密码</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+    <h4>即将跳转至首页......</h4>
+    <script>
+        window.setTimeout('window.location.href="/"', 2000);
+    </script>
+{% endif %}
+{% endblock %}

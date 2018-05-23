@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'read_statistics',
     'comment',
     'custom_user',
+    'ueditor',
+    'favor',
 ]
 
 MIDDLEWARE = [
@@ -69,7 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'mysite.overall_form.overall_form',
+                'custom_user.overall_form.overall_form',
             ],
         },
     },
@@ -85,9 +87,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',  
         'NAME': 'mysite',  
-        'USER': '*****',  
-        'PASSWORD': '******',  
-        'HOST': '39.107.104.165',  
+        'USER': 'root',  
+        'PASSWORD': 'root',  
+        'HOST': '192.168.1.110',  
         'PORT': '3306',  
     }
 }
