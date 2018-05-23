@@ -1,0 +1,15 @@
+div.panel-heading span{
+    font-size: 1.5em;
+}
+ul.user-info{
+    list-style: none;
+}
+ul.user-info li:not(:last-child){
+    padding-bottom: 0.8em;
+}
+h4{
+    margin-left: 2em;
+}
+.container {
+    padding-top: 1em;
+}
