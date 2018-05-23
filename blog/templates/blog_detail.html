@@ -29,7 +29,8 @@
                     </div>
                    <!--  {% autoescape off %}<div class="blog-content">{{ blog.content}}
                     </div>{% endautoescape %} -->
-                    <div class="favor" onclick="favor_count(this, 'blog', {{ blog.id }})">
+                    <div class="favor" onclick="favor_count(this, 'blog', 
+                    {{ blog.id }})">
                         <span class="glyphicon glyphicon-thumbs-up {% get_favor_status blog request %}"></span>
                         <span class="favor_num">{% get_favor_num blog %}</span>
                         <span>喜欢</span>
@@ -110,7 +111,7 @@
                                     <span class="favor_num">{% get_favor_num comment %}</span>
                                     
                                 </div>
-                                <a href="javascript:reply({{ comment.id }});">回复</a>
+                                <a href="{% if request.session.username %}javascript:reply({{ reply.id }});{% else %}javascript:void(0);{% endif %}"">回复</a>
                                 {% for reply in comment.root_comment.all %}
                                 <div class="reply">
                                     <span id="user-{{reply.id}}">{{ reply.user.username }}</span>&nbsp;({{ reply.create_time | date:"Y-m-d H:i:s" }})回复: <span>{{reply.reply_to.username }}</span>&nbsp;
@@ -121,7 +122,7 @@
                                         <span class="glyphicon glyphicon-thumbs-up {% get_favor_status reply request %}"></span>
                                         <span class="favor_num">{% get_favor_num reply %}</span>
                                     </div>
-                                    <a href="javascript:reply({{ reply.id }});">回复</a>
+                                    <a href="{% if request.session.username %}javascript:reply({{ reply.id }});{% else %}javascript:void(0);{% endif %}">回复</a>
                                 </div>
                                 {% endfor %}
                             </div>
@@ -254,6 +255,7 @@
                     }
                     $(obj).children('.favor_num').text(data.message);
                 }else{
+                    alert(data.message);
                     console.log(data);
                 }
             },
