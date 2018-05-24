@@ -22,9 +22,10 @@ def overall_login(request):
     login_form = loginForm(request.POST)
     if login_form.is_valid():
         user = login_form.cleaned_data['user']
-        #写入session表的用户信息
+        #写入session表的用户信息，考虑封装成一个方法？
         request.session.set_expiry(0)
         request.session['username'] = user.username
+        request.session['nickname'] = user.userprofile.nickname
         request.session['password'] = user.password
         request.session['is_supuser'] = user.is_supuser
         request.session['email'] = user.email
@@ -75,6 +76,7 @@ def login(request):
             #写入session表的用户信息
             request.session.set_expiry(0)
             request.session['username'] = user.username
+            request.session['nickname'] = user.userprofile.nickname
             request.session['password'] = user.password
             request.session['is_supuser'] = user.is_supuser
             request.session['email'] = user.email
