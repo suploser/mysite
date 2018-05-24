@@ -13,7 +13,7 @@
                 </div>
                 <div class="panel-body">
                     <ul class="user-info">
-                        <li>昵称: </li>
+                        <li>昵称: {{ request.session.nickname }} <a href="#">修改昵称</a></li>
                         <li>用户名：{{ request.session.username }}</li>
                         <li>邮箱: {{ request.session.email }}&nbsp;&nbsp;<a href="#">更换邮箱</a></li>
                         <li>上次登录时间: {{ request.session.last_login_time }}</li>
