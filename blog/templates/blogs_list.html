@@ -31,7 +31,7 @@
                                &nbsp;&nbsp;评论:{% get_comment_count blog %}
                                &nbsp;&nbsp;点赞:{% get_favor_num blog %}
                             </p>              
-                            <p>{{ blog.content | safe|striptags | truncatechars:120}}</p>
+                            <p class='blog-content'>{{ blog.content | safe|striptags | truncatechars:120}}</p>
                         </div>
                     {% empty %}
                             <h3>--暂无博客,敬请期待--</h3>   
