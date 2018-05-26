@@ -1,5 +1,5 @@
 from django import forms
-from .models import User
+from .models import User, ConfirmString, CheckCode
 import utils
 
 class loginForm(forms.Form):
@@ -64,3 +64,63 @@ class RegForm(forms.Form):
         if password_again != password:
             raise forms.ValidationError('两次密码输入不一致')
         return password_again
+
+
+class ForgetPwdForm(forms.Form):
+    email = forms.EmailField(
+        label='邮箱',
+        widget=forms.EmailInput(attrs={'class':'form-control', 'placeholder':'请输入注册时所用邮箱'})
+    )
+    pwd_1 = forms.CharField(
+        label='新的密码',
+        min_length=8,
+        max_length=20,
+        widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder':'请输入8-20位的新密码'})
+        ) 
+    pwd_2 = forms.CharField(
+        label='再输入一次',
+        min_length=8,
+        max_length=20,
+        widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder':'再一次输入密码'})
+        ) 
+    check_code = forms.CharField(
+        label='验证码',
+        widget=forms.TextInput(attrs={'class':'form-control','placeholder':'请输入验证码'})
+        )
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if not User.objects.filter(email=email):
+            raise form.ValidationError('该邮箱未被注册')
+        return email
+
+    def clean_pwd_2(self):
+        # 验证两次输入的密码是否相同
+        pwd_2 = self.cleaned_data.get('pwd_2','')
+        pwd_1 = self.cleaned_data.get('pwd_1')
+        if pwd_1 != pwd_2:
+            raise forms.ValidationError('两次输入的密码不一致')
+        return pwd_2
+
+    def clean_check_code(self):
+        check_code = self.cleaned_data.get('check_code')
+        email = self.cleaned_data.get('email')
+        # 该验证方式更加严谨
+        # 验证码是否正确
+        user = User.objects.get(email=email)   
+        if not CheckCode.objects.filter(user=user):
+            raise forms.ValidationError('未获取验证码')    
+        code = CheckCode.objects.get(user=user)
+        if code.check_code != check_code:
+            raise forms.ValidationError('验证码不正确')
+        # 验证码是否失效
+        from datetime import timedelta
+        from django.utils import timezone
+        if timezone.now() - code.created_time > timedelta(seconds=600):
+            # 删除过期验证码
+            code.delete()
+            raise forms.ValidationError('验证码失效，请重新获取')
+       
+        return check_code
+
+
