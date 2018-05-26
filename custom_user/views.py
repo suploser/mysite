@@ -5,17 +5,28 @@ from django.shortcuts import render,redirect
 from django.conf import settings
 from django.urls import reverse
 from django.http import JsonResponse
-from .models import User, ConfirmString
+from .models import User, ConfirmString , CheckCode
 from blog.models import Blog
-from .forms import loginForm, RegForm
+from .forms import loginForm, RegForm, ForgetPwdForm
 import utils
 # Create your views here.
+
+def write_to_session(request, user):
+    request.session.set_expiry(0)
+    request.session['username'] = user.username
+    request.session['nickname'] = user.userprofile.nickname
+    request.session['password'] = user.password
+    request.session['is_supuser'] = user.is_supuser
+    request.session['email'] = user.email
+    request.session['last_login_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    request.session['user'] = 'user'
+
 def user_info(request):
     context = {}
     return render(request, 'user_info.html', context)
 
 def get_error(field, form):
-    return ','.join(form.errors.get(field,''))
+    return ','.join(form.errors.get(field,[]))
 
 def overall_login(request):
     data = {}
@@ -23,14 +34,7 @@ def overall_login(request):
     if login_form.is_valid():
         user = login_form.cleaned_data['user']
         #写入session表的用户信息，考虑封装成一个方法？
-        request.session.set_expiry(0)
-        request.session['username'] = user.username
-        request.session['nickname'] = user.userprofile.nickname
-        request.session['password'] = user.password
-        request.session['is_supuser'] = user.is_supuser
-        request.session['email'] = user.email
-        request.session['last_login_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        request.session['user'] = 'user'
+        write_to_session(request, user);
         data['status'] = 'Success'
         data['referer'] = request.META.get('HTTP_REFERER', reverse('home'))
         return JsonResponse(data)
@@ -74,17 +78,12 @@ def login(request):
         if login_form.is_valid():
             user = login_form.cleaned_data['user']
             #写入session表的用户信息
-            request.session.set_expiry(0)
-            request.session['username'] = user.username
-            request.session['nickname'] = user.userprofile.nickname
-            request.session['password'] = user.password
-            request.session['is_supuser'] = user.is_supuser
-            request.session['email'] = user.email
-            request.session['last_login_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            request.session['user'] = 'user'
-            
+            write_to_session(request, user);
             return redirect(referer)
-    return render(request, 'login.html', {'login_form':login_form,'referer':referer})
+    if not request.session.get('username'):
+        return render(request, 'login.html', {'login_form':login_form,'referer':referer})
+    else:
+        return render(request, 'message.html', {'message':'您已登录，不可重复登录或者注销后再次登录'})
 
 def regist(request):
     regist_form = RegForm()
@@ -111,6 +110,7 @@ def regist(request):
 def confirm(request):
     token = request.GET.get('token')
     referer = request.GET.get('from')
+    # token几乎不会重复,所以偷个懒
     confirm = ConfirmString.objects.filter(token=token).first()
     if not confirm:
         message = '无效的链接'
@@ -119,6 +119,7 @@ def confirm(request):
     now = timezone.now()
     reg_time = confirm.reg_time
     if  now > reg_time + timedelta(days=settings.CONFIRM_DAYS):
+        # 删除失效用户
         confirm.user.delete()
         message = '链接已过期,请重新注册!'
         referer = reverse('regist')+"?from="+referer
@@ -138,3 +139,59 @@ def logout(request):
     if request.session.exists(session_key):
         request.session.delete(session_key)
     return redirect(referer)
+
+def get_check_code(request):
+    email = request.GET.get('email')
+    import string, random
+    token = ''.join(random.sample(string.printable[:26], 6))
+    data = {}
+    try:
+        if not User.objects.filter(email=email):
+            raise Exception('该邮箱未被注册')
+        user = User.objects.get(email=email)
+        if CheckCode.objects.filter(user=user):
+            code =CheckCode.objects.get(user=user)
+            if timezone.now() < timedelta(seconds=60)+ code.created_time:
+                raise Exception('已经获取过验证码，请稍后再试')
+        else:
+            code = CheckCode(user=user)
+        # 生成6位验证码
+        code.check_code = token
+        code.save()
+        utils.send_email_code(email, token)
+        data['status'] = 'Success'
+        data['message'] = '验证码已发送至邮件，注意查收'
+
+    except Exception as e:
+        data['status'] = 'Fail'
+        data['message'] = str(e)
+
+    finally:
+        return JsonResponse(data)
+
+def reset_pwd(request):
+    data={}
+    if request.method == 'POST':
+        forget_pwd_form = ForgetPwdForm(request.POST)
+        if forget_pwd_form.is_valid():
+            email = forget_pwd_form.cleaned_data['email']
+            password = forget_pwd_form.cleaned_data['pwd_1']
+            # 修改密码，为custom_user添加一个set_pwd方法（便于加密）？？
+            user = User.objects.get(email=email)
+            user.password = utils.hash_token(password)
+            user.save()
+            # 删除验证码
+            code = CheckCode.objects.get(user=user)
+            code.delete()
+            # 重置密码后自动登录
+            write_to_session(request, user);
+            data['status'] = 'Success'
+            data['message'] = '密码修改成功'
+            return JsonResponse(data)
+        data['status'] = 'Fail'
+        data['email_error'] = get_error('email', forget_pwd_form)
+        data['pwd_1_error'] = get_error('pwd_1', forget_pwd_form)
+        data['pwd_2_error'] = get_error('pwd_2', forget_pwd_form)
+        data['check_code_error'] = get_error('check_code', forget_pwd_form)
+        return JsonResponse(data)
+    return render(request, 'reset_pwd.html')
