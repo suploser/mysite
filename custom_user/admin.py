@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, ConfirmString, UserProfile
+from .models import User, ConfirmString, UserProfile, CheckCode
 # Register your models here.
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
@@ -18,4 +18,7 @@ class ConfirmStringAdmin(admin.ModelAdmin):
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'nickname')
 
+@admin.register(CheckCode)
+class CheckCodeAdmin(admin.ModelAdmin):
+    list_display = ('user', 'check_code', 'created_time')
 
