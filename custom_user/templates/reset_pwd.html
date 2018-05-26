@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}重置密码{% endblock %}
+{% load staticfiles %}
+{% load custom_user_tag %}
+{% block header_extends %}
+<link rel="stylesheet" href="{% static 'css/pwd.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-offset-4 col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                        <span>重置密码</span>
+                </div>
+                <div class="panel-body">
+                    {% get_pwd_form as pwd_form %}
+                    <form action="javascript:void(0)" id="reset_pwd">
+                    {% csrf_token %}
+                    {% for field in pwd_form %}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        <p id="error_{{ field.id_for_label }}" class="text-danger"></p>
+                    {% endfor %}
+                    </form>
+                     <button class="submit btn btn-default pull-right" onclick="submit()">
+                        提交
+                    </button>
+                     <button class="get-code btn btn-default pull-right" style="margin-right: 1em;" onclick="get_check_code()">
+                        获取验证码
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scriptarea %}
+    <script>
+        function check_email(email){
+            // 检查输入的email格式,正则匹配
+            if(email.trim()==''){
+                $('#error_id_email').text('邮件不能为空')
+                return false;
+            }
+            return email.trim();
+        }
+        function submit(){
+            $('.text-danger').text('');
+            $('.submit').addClass('disabled');
+            data = $('#reset_pwd').serialize();
+            $.ajax({
+                url: "{% url 'reset_pwd' %}",
+                type: 'POST',
+                data: data,
+                cache: false,
+                success: function(data){
+                    if(data.status=='Success'){
+                        $('#non_field_error').text(data.message);
+                        window.setTimeout('window.location.href="/"', 2000);
+                        $('.submit').removeClass('disabled');
+                    }else{
+                        if(data.email_error!=''){
+                            $('#error_id_email').text(data.email_error);
+                            $('.submit').removeClass('disabled');
+                            return;
+                        }
+                        if(data.pwd_1_error!=''){
+                            $('#error_id_pwd_1').text(data.pwd_1_error);
+                            $('.submit').removeClass('disabled');
+                            return;
+                        }
+                        if(data.pwd_2_error!=''){
+                            $('#error_id_pwd_2').text(data.pwd_2_error);
+                            $('.submit').removeClass('disabled');
+                            return;
+                        }
+                        if(data.chck_code_error!=''){
+                            $('#error_id_check_code').text(data.check_code_error);
+                            $('.submit').removeClass('disabled');
+                            return;
+                        }
+                    }
+                },
+                error: function(xhr){
+
+                }
+            })
+        }
+        // 倒计时
+        function time_run(time_check){
+            time_check -= 1;
+            if (time_check>0){
+                $('.get-code').text('('+time_check+') 重新获取');
+                setTimeout(function(){time_run(time_check)}, 1000);
+            }
+            else{
+                $('.get-code').removeClass('disabled');
+                $('.get-code').text('获取验证码');
+            }
+
+        }
+        function get_check_code(){
+            $('.text-danger').text('');
+            email = check_email($('#id_email').val());
+            if (email==false){
+                return;
+            }else{
+               $('.get-code').addClass('disabled');
+            }
+            $.ajax({
+                url: "{% url 'get_check_code' %}",
+                type: 'GET',
+                data: {'email':email},
+                cache: false,
+                success: function(data){
+                    if(data.status=='Success'){
+                        alert(data.message);
+                        time_run(60);
+                    }else{
+                        alert(data.message);
+                        $('.get-code').removeClass('disabled');
+                    }
+                },
+                error: function(xhr){
+
+                }
+            });
+        }
+    </script>
+{% endblock %}
