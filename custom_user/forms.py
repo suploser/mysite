@@ -6,13 +6,13 @@ class loginForm(forms.Form):
     username = forms.CharField(label='用户名',
         widget=forms.TextInput(
             attrs={'id':'login-username', 'class':'form-control','placeholder':"请输入用户名"}),
-        error_messages={'required':'用户名不能为空'}
+            error_messages={'required':'用户名不能为空'}
         )
     password = forms.CharField(
         label='密码', 
         widget=forms.PasswordInput(
             attrs={'id':'login-password','class':'form-control','placeholder':"请输入密码"}),
-        error_messages={'required':'密码不能为空'}
+            error_messages={'required':'密码不能为空'}
         )
 
     def clean(self):
@@ -123,4 +123,54 @@ class ForgetPwdForm(forms.Form):
        
         return check_code
 
+class ChangePwdForm(forms.Form):
+    old_pwd = forms.CharField(
+            label='旧的密码',
+            min_length=8,
+            max_length=15,
+            widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder':'请输入旧的密码'})
+        )
+    new_pwd = forms.CharField(
+            label='新的密码',
+            min_length=8,
+            max_length=15,
+            widget=forms.PasswordInput(attrs={'class':'form-control','placeholder':'请输入新的密码'})
+        )
+    new_pwd_again = forms.CharField(
+            label='再输入一次',
+            min_length=8,
+            max_length=15,
+            widget=forms.PasswordInput(attrs={'class':'form-control','placeholder':'请再输入一次的密码'})
+        )
 
+    def __init__(self, *args, **kwds):
+        if 'session' in kwds:
+            self.session = kwds.pop('session')
+        super(ChangePwdForm, self).__init__(*args, **kwds)
+
+    def clean_old_pwd(self):
+        old_pwd = self.cleaned_data.get('old_pwd')
+        old_pwd = utils.hash_token(old_pwd)
+        password = self.session.get('password')
+        if old_pwd != password:
+            raise forms.ValidationError('输入的密码与当前用户密码不一致')
+        return old_pwd     
+
+    def clean_new_pwd(self):
+        new_pwd = self.cleaned_data.get('new_pwd', '')
+        new_pwd = utils.hash_token(new_pwd)
+        return new_pwd
+
+    def clean_new_pwd_again(self):
+        new_pwd = self.cleaned_data.get('new_pwd', '')
+        new_pwd_again = self.cleaned_data.get('new_pwd_again')
+        new_pwd_again = utils.hash_token(new_pwd_again)
+        if new_pwd_again != new_pwd:
+            raise forms.ValidationError('两次输入的密码不一致')
+        return new_pwd_again
+
+    def clean(self):
+        new_pwd = self.cleaned_data.get('new_pwd_again')
+        if new_pwd == self.cleaned_data.get('old_pwd'):
+            raise forms.ValidationError('新密码与旧密码相同')
+        return self.cleaned_data
