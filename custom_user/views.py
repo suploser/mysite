@@ -10,7 +10,7 @@ from blog.models import Blog
 from .forms import loginForm, RegForm, ForgetPwdForm
 import utils
 # Create your views here.
-
+# 登录信息写入session
 def write_to_session(request, user):
     request.session.set_expiry(0)
     request.session['username'] = user.username
