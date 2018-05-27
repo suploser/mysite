@@ -1,13 +1,14 @@
 from datetime import timedelta
 from datetime import datetime
 from django.utils import timezone
+# render返回一个HTTPResponse，set_cookie
 from django.shortcuts import render,redirect
 from django.conf import settings
 from django.urls import reverse
 from django.http import JsonResponse
 from .models import User, ConfirmString , CheckCode
 from blog.models import Blog
-from .forms import loginForm, RegForm, ForgetPwdForm
+from .forms import loginForm, RegForm, ForgetPwdForm, ChangePwdForm
 import utils
 # Create your views here.
 # 登录信息写入session
@@ -26,7 +27,7 @@ def user_info(request):
     return render(request, 'user_info.html', context)
 
 def get_error(field, form):
-    return ','.join(form.errors.get(field,[]))
+    return ','.join(form.errors.get(field,''))
 
 def overall_login(request):
     data = {}
@@ -195,3 +196,27 @@ def reset_pwd(request):
         data['check_code_error'] = get_error('check_code', forget_pwd_form)
         return JsonResponse(data)
     return render(request, 'reset_pwd.html')
+
+def change_pwd(request):
+    if request.method == 'POST':
+        data = {}
+        c_form = ChangePwdForm(request.POST, session=request.session)
+        if c_form.is_valid():
+            # 找到user对象
+            username = request.session.get('username')
+            user = User.objects.get(username=username)
+            new_pwd = c_form.cleaned_data.get('new_pwd')
+            user.password = new_pwd
+            user.save()
+            # 修改session内容
+            request.session['password'] = user.password
+            data['status'] = 'Success'
+            data['message'] = '密码修改成功'
+            return JsonResponse(data)
+        data['status'] = 'Fail'
+        data['old_pwd_error'] = get_error('old_pwd', c_form )
+        data['new_pwd_error'] = get_error('new_pwd', c_form )
+        data['new_pwd_again_error'] = get_error('new_pwd_again', c_form)
+        data['non_field_error'] = ','.join(c_form.non_field_errors())
+        return JsonResponse(data)
+    return render(request, 'change_pwd.html')
