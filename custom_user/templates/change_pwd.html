@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_user_tag %}
+{% block title %}修改密码{% endblock %}
+{% block header_extends %}
+<link rel="stylesheet" href="{% static 'css/pwd.css' %}">
+{% endblock %}
+{% block content %}
+{% if not request.session.username %}
+    <h4 style="text-align: center;">您还没有登录, 请登录后进行修改！</h4>
+    <script>
+        window.setTimeout('window.location.href="/"', 1000);
+    </script>
+{% else %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-offset-4 col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span>修改密码</span>
+                    </div>
+                    <div class="panel-body">
+                        {% get_change_pwd_form as form %}
+                        <form action="javascript:void(0);" id="change_pwd">
+                        {% csrf_token %}
+                        {% for field in form %}
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        <p id="{{ field.id_for_label }}_error" class="text-danger"></p>
+                        {% endfor %}
+                        </form>
+                        <button class="btn btn-primary pull-right" onclick="submit()">提交</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+{% block scriptarea %}
+    <script>
+        // function check_data(data){
+        //     // 前端检验
+        //     return data;
+        // }
+        function submit(){
+            $('.text-danger').text('');
+            data = $('#change_pwd').serialize();
+            // data = check_data(data);
+            console.log(data);
+            $.ajax({
+                url: "{% url 'change_pwd' %}",
+                type: 'POST',
+                data: data,
+                cache: false,
+                success: function(data){
+                    console.log(data.status);
+                    if(data.status=='Success'){
+                        
+                        alert(data.message);
+                        window.location.href = '/';
+                    }else{
+                        if(data.old_pwd_error != ''){
+                            $('#id_old_pwd_error').text(data.old_pwd_error);
+                            return;
+                        }
+                        if(data.new_pwd_error != ''){
+                            $('#id_new_pwd_error').text(data.new_pwd_error);
+                            return;
+                        }
+                        if(data.new_pwd_again_error != ''){
+                            $('#id_new_pwd_again_error').text(data.new_pwd_again_error);
+                            return;
+                        }
+                        // 新旧密码一样
+                        if (data.non_field_error != ''){
+                            $('#id_new_pwd_error').text(data.non_field_error);
+                            return;
+                        }
+                    }
+                },
+                error: function(xhr){
+                    // 忽略
+                },
+            });
+        }
+    </script>
+{% endblock %}
