@@ -60,24 +60,21 @@
                         window.setTimeout('window.location.href="/"', 2000);
                         $('.submit').removeClass('disabled');
                     }else{
+                        $('.submit').removeClass('disabled');
                         if(data.email_error!=''){
                             $('#error_id_email').text(data.email_error);
-                            $('.submit').removeClass('disabled');
                             return;
                         }
                         if(data.pwd_1_error!=''){
                             $('#error_id_pwd_1').text(data.pwd_1_error);
-                            $('.submit').removeClass('disabled');
                             return;
                         }
                         if(data.pwd_2_error!=''){
                             $('#error_id_pwd_2').text(data.pwd_2_error);
-                            $('.submit').removeClass('disabled');
                             return;
                         }
                         if(data.chck_code_error!=''){
                             $('#error_id_check_code').text(data.check_code_error);
-                            $('.submit').removeClass('disabled');
                             return;
                         }
                     }
