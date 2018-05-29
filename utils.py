@@ -31,7 +31,7 @@ def make_confirm_string(str):
 
 # 发送验证码邮件
 def send_email_code(email, token):
-    subject = '重置密码'
+    subject = '邮箱验证码'
     text_content = '''
         你的邮箱服务器不支持html链接功能,请联系管理员!
     '''
