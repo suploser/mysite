@@ -1,3 +1,4 @@
+import string, random
 from datetime import timedelta
 from datetime import datetime
 from django.utils import timezone
@@ -8,7 +9,7 @@ from django.urls import reverse
 from django.http import JsonResponse
 from .models import User, ConfirmString , CheckCode
 from blog.models import Blog
-from .forms import loginForm, RegForm, ForgetPwdForm, ChangePwdForm
+from .forms import loginForm, RegForm, ForgetPwdForm, ChangePwdForm, ChangeEmailForm
 import utils
 # Create your views here.
 # 登录信息写入session
@@ -141,9 +142,9 @@ def logout(request):
         request.session.delete(session_key)
     return redirect(referer)
 
+# 把验证码保存到数据库
 def get_check_code(request):
     email = request.GET.get('email')
-    import string, random
     token = ''.join(random.sample(string.printable[:26], 6))
     data = {}
     try:
@@ -197,6 +198,20 @@ def reset_pwd(request):
         return JsonResponse(data)
     return render(request, 'reset_pwd.html')
 
+def is_login(func):
+    def wrapper(request):
+        data = {}
+        try:
+            if not request.session.get('username'):
+                raise Exception('您还未登录')
+            return func(request) 
+        except Exception as e:
+            data['status'] = 'Fail'
+            data['message'] = str(e)
+            return JsonResponse(data)
+    return wrapper
+
+@is_login
 def change_pwd(request):
     if request.method == 'POST':
         data = {}
@@ -220,3 +235,51 @@ def change_pwd(request):
         data['non_field_error'] = ','.join(c_form.non_field_errors())
         return JsonResponse(data)
     return render(request, 'change_pwd.html')
+
+# 获取验证码
+# 通过session保存check_code
+def get_check_code_1(request):
+    email = request.GET.get('email')
+    check_code = ''.join(random.sample(string.printable[:26], 4))
+    data = {}
+    try:
+        if User.objects.filter(email=email):
+            raise Exception('邮箱已经被使用')
+        if request.session.get('check_code'):
+            check_code_time = datetime.strptime(request.session.get('check_code_time'),  '%Y-%m-%d %H:%M:%S')
+            if check_code_time+timedelta(seconds=30) > datetime.now():
+                raise Exception('已获取验证码,请稍后再试')
+        request.session['check_code'] = check_code
+        request.session['check_code_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        utils.send_email_code(email, check_code)
+        data['status'] = 'Success'
+        data['message'] = '验证码已发送至邮箱,请注意查收'
+    except Exception as e:
+        data['status'] = 'Fail'
+        data['message'] = str(e)
+    finally:
+        return JsonResponse(data)
+
+@is_login
+def change_email(request):
+    data = {}
+    if request.method == 'POST':
+        change_email_from = ChangeEmailForm(request.POST, session=request.session)
+        if change_email_from.is_valid():
+            username = request.session.get('username')
+            new_email = change_email_from.cleaned_data.get('new_email')
+            user = User.objects.get(username=username)
+            user.email = new_email
+            user.save()
+            request.session.pop('check_code')
+            request.session.pop('check_code_time')
+            request.session['email'] = user.email
+            # del request.session['chcek_code'] 
+            data['status'] = 'Success'
+            data['message'] = '修改邮箱成功'
+            return JsonResponse(data)
+        data['status'] = 'Fail'
+        data['new_email_error'] = get_error('new_email', change_email_from)
+        data['check_code_error'] = get_error('check_code', change_email_from)
+        return JsonResponse(data)
+    return render(request, 'change_email.html')
