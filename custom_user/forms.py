@@ -1,4 +1,5 @@
 from django import forms
+from datetime import datetime, timedelta
 from .models import User, ConfirmString, CheckCode
 import utils
 
@@ -174,3 +175,36 @@ class ChangePwdForm(forms.Form):
         if new_pwd == self.cleaned_data.get('old_pwd'):
             raise forms.ValidationError('新密码与旧密码相同')
         return self.cleaned_data
+
+class ChangeEmailForm(forms.Form):
+    new_email =  forms.EmailField(
+            label='新的邮箱',
+            widget=forms.EmailInput(attrs={'class':'form-control', 'placeholder':'请输入新邮箱'})
+        )
+    check_code = forms.CharField(
+            label='验证码',
+            widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'请输入验证码'})
+        )
+
+    def __init__(self, *args, **kwds):
+        if 'session' in kwds:
+            self.session = kwds.pop('session')
+        super(ChangeEmailForm, self).__init__(*args, **kwds)
+
+
+    def clean_new_email(self):
+        new_email = self.cleaned_data.get('new_email')
+        if User.objects.filter(email=new_email):
+            raise forms.ValidationError('该邮箱已被使用')
+        return new_email
+
+    def clean_check_code(self):
+        check_code = self.cleaned_data.get('check_code')
+        if not self.session.get('check_code'):
+            raise forms.ValidationError('未获取验证码')
+        if check_code != self.session.get('check_code'):
+            raise forms.ValidationError('验证码不正确')
+        check_code_time = self.session.get('check_code_time')
+        if datetime.strptime(check_code_time, '%Y-%m-%d %H:%M:%S') + timedelta(seconds=600) <datetime.now():
+            raise forms.ValidationError('验证码失效')
+        return check_code
