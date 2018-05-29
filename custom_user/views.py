@@ -145,7 +145,7 @@ def logout(request):
 # 把验证码保存到数据库
 def get_check_code(request):
     email = request.GET.get('email')
-    token = ''.join(random.sample(string.printable[:26], 6))
+    token = ''.join(random.sample(string.digits+string.ascii_letters, 6))
     data = {}
     try:
         if not User.objects.filter(email=email):
@@ -198,6 +198,7 @@ def reset_pwd(request):
         return JsonResponse(data)
     return render(request, 'reset_pwd.html')
 
+# 判断是否登录的装饰器
 def is_login(func):
     def wrapper(request):
         data = {}
@@ -240,7 +241,7 @@ def change_pwd(request):
 # 通过session保存check_code
 def get_check_code_1(request):
     email = request.GET.get('email')
-    check_code = ''.join(random.sample(string.printable[:26], 4))
+    check_code = ''.join(random.sample(string.digits+string.ascii_letters, 4))
     data = {}
     try:
         if User.objects.filter(email=email):
