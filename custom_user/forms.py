@@ -1,18 +1,19 @@
 from django import forms
-from .models import User
+from datetime import datetime, timedelta
+from .models import User, ConfirmString, CheckCode
 import utils
 
 class loginForm(forms.Form):
     username = forms.CharField(label='用户名',
         widget=forms.TextInput(
             attrs={'id':'login-username', 'class':'form-control','placeholder':"请输入用户名"}),
-        error_messages={'required':'用户名不能为空'}
+            error_messages={'required':'用户名不能为空'}
         )
     password = forms.CharField(
         label='密码', 
         widget=forms.PasswordInput(
             attrs={'id':'login-password','class':'form-control','placeholder':"请输入密码"}),
-        error_messages={'required':'密码不能为空'}
+            error_messages={'required':'密码不能为空'}
         )
 
     def clean(self):
@@ -64,3 +65,146 @@ class RegForm(forms.Form):
         if password_again != password:
             raise forms.ValidationError('两次密码输入不一致')
         return password_again
+
+
+class ForgetPwdForm(forms.Form):
+    email = forms.EmailField(
+        label='邮箱',
+        widget=forms.EmailInput(attrs={'class':'form-control', 'placeholder':'请输入注册时所用邮箱'})
+    )
+    pwd_1 = forms.CharField(
+        label='新的密码',
+        min_length=8,
+        max_length=20,
+        widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder':'请输入8-20位的新密码'})
+        ) 
+    pwd_2 = forms.CharField(
+        label='再输入一次',
+        min_length=8,
+        max_length=20,
+        widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder':'再一次输入密码'})
+        ) 
+    check_code = forms.CharField(
+        label='验证码',
+        widget=forms.TextInput(attrs={'class':'form-control','placeholder':'请输入验证码'})
+        )
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if not User.objects.filter(email=email):
+            raise form.ValidationError('该邮箱未被注册')
+        return email
+
+    def clean_pwd_2(self):
+        # 验证两次输入的密码是否相同
+        pwd_2 = self.cleaned_data.get('pwd_2','')
+        pwd_1 = self.cleaned_data.get('pwd_1')
+        if pwd_1 != pwd_2:
+            raise forms.ValidationError('两次输入的密码不一致')
+        return pwd_2
+
+    def clean_check_code(self):
+        check_code = self.cleaned_data.get('check_code')
+        email = self.cleaned_data.get('email')
+        # 该验证方式更加严谨
+        # 验证码是否正确
+        user = User.objects.get(email=email)   
+        if not CheckCode.objects.filter(user=user):
+            raise forms.ValidationError('未获取验证码')    
+        code = CheckCode.objects.get(user=user)
+        if code.check_code != check_code:
+            raise forms.ValidationError('验证码不正确')
+        # 验证码是否失效
+        from datetime import timedelta
+        from django.utils import timezone
+        if timezone.now() - code.created_time > timedelta(seconds=600):
+            # 删除过期验证码
+            code.delete()
+            raise forms.ValidationError('验证码失效，请重新获取')
+       
+        return check_code
+
+class ChangePwdForm(forms.Form):
+    old_pwd = forms.CharField(
+            label='旧的密码',
+            min_length=8,
+            max_length=15,
+            widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder':'请输入旧的密码'})
+        )
+    new_pwd = forms.CharField(
+            label='新的密码',
+            min_length=8,
+            max_length=15,
+            widget=forms.PasswordInput(attrs={'class':'form-control','placeholder':'请输入新的密码'})
+        )
+    new_pwd_again = forms.CharField(
+            label='再输入一次',
+            min_length=8,
+            max_length=15,
+            widget=forms.PasswordInput(attrs={'class':'form-control','placeholder':'请再输入一次的密码'})
+        )
+
+    def __init__(self, *args, **kwds):
+        if 'session' in kwds:
+            self.session = kwds.pop('session')
+        super(ChangePwdForm, self).__init__(*args, **kwds)
+
+    def clean_old_pwd(self):
+        old_pwd = self.cleaned_data.get('old_pwd')
+        old_pwd = utils.hash_token(old_pwd)
+        password = self.session.get('password')
+        if old_pwd != password:
+            raise forms.ValidationError('输入的密码与当前用户密码不一致')
+        return old_pwd     
+
+    def clean_new_pwd(self):
+        new_pwd = self.cleaned_data.get('new_pwd', '')
+        new_pwd = utils.hash_token(new_pwd)
+        return new_pwd
+
+    def clean_new_pwd_again(self):
+        new_pwd = self.cleaned_data.get('new_pwd', '')
+        new_pwd_again = self.cleaned_data.get('new_pwd_again')
+        new_pwd_again = utils.hash_token(new_pwd_again)
+        if new_pwd_again != new_pwd:
+            raise forms.ValidationError('两次输入的密码不一致')
+        return new_pwd_again
+
+    def clean(self):
+        new_pwd = self.cleaned_data.get('new_pwd_again')
+        if new_pwd == self.cleaned_data.get('old_pwd'):
+            raise forms.ValidationError('新密码与旧密码相同')
+        return self.cleaned_data
+
+class ChangeEmailForm(forms.Form):
+    new_email =  forms.EmailField(
+            label='新的邮箱',
+            widget=forms.EmailInput(attrs={'class':'form-control', 'placeholder':'请输入新邮箱'})
+        )
+    check_code = forms.CharField(
+            label='验证码',
+            widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'请输入验证码'})
+        )
+
+    def __init__(self, *args, **kwds):
+        if 'session' in kwds:
+            self.session = kwds.pop('session')
+        super(ChangeEmailForm, self).__init__(*args, **kwds)
+
+
+    def clean_new_email(self):
+        new_email = self.cleaned_data.get('new_email')
+        if User.objects.filter(email=new_email):
+            raise forms.ValidationError('该邮箱已被使用')
+        return new_email
+
+    def clean_check_code(self):
+        check_code = self.cleaned_data.get('check_code')
+        if not self.session.get('check_code'):
+            raise forms.ValidationError('未获取验证码')
+        if check_code != self.session.get('check_code'):
+            raise forms.ValidationError('验证码不正确')
+        check_code_time = self.session.get('check_code_time')
+        if datetime.strptime(check_code_time, '%Y-%m-%d %H:%M:%S') + timedelta(seconds=600) <datetime.now():
+            raise forms.ValidationError('验证码失效')
+        return check_code

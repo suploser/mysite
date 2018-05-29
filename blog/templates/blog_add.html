@@ -57,6 +57,7 @@
 {% block scriptarea %}
 <script>
     function check_data(){
+        // 前端检验数据
         $('.tip-text').text('');
         var title = $('#blog_title').val();
         if(title.length<=0 || title.length>=50){

@@ -1,0 +1,10 @@
+.panel-heading span{
+    font-size: 1.4em;
+}
+.panel-heading{
+    background: white!important;
+}
+
+button.pull-right{
+    margin-top: 0.5em;
+}

@@ -2,6 +2,7 @@
 {% load staticfiles %}
 {% load favor_tags %}
 {% load custom_tags %}
+{% load blog_custom_tags %}
 {% block title %}我的站点{% endblock %}
 {% block blogs_list_active %}active{% endblock %}
 {% block header_extends %}<link rel="stylesheet" href={% static 'blog.css' %}> {% endblock %}  
@@ -31,7 +32,7 @@
                                &nbsp;&nbsp;评论:{% get_comment_count blog %}
                                &nbsp;&nbsp;点赞:{% get_favor_num blog %}
                             </p>              
-                            <p>{{ blog.content | safe|striptags | truncatechars:120}}</p>
+                            <p class='blog-content'>{{ blog.content | striptags | safe | truncatechars:100}}</p>
                         </div>
                     {% empty %}
                             <h3>--暂无博客,敬请期待--</h3>   

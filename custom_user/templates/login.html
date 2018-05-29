@@ -1,7 +1,5 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
-
-
     {% block title %}登录{% endblock %}
     {% block home_active %}active{% endblock %}
     {% block content %}
@@ -23,7 +21,7 @@
                             </div>
                             {% endfor %}
                                <span class="text-danger">{{ login_form.non_field_errors }}</span>
-                            <span><a href="{% url 'regist' %}?from={{referer}}" class="">没有账号?点击注册</a></span>     
+                            <span><a href="{% url 'reset_pwd' %}">忘记密码？</a></span>     
                             <input type="submit" value="登录" class="btn btn-primary pull-right">
                             </form>
                         </div>

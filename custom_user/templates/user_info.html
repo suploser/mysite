@@ -13,11 +13,10 @@
                 </div>
                 <div class="panel-body">
                     <ul class="user-info">
-                        <li>昵称: </li>
                         <li>用户名：{{ request.session.username }}</li>
-                        <li>邮箱: {{ request.session.email }}&nbsp;&nbsp;<a href="#">更换邮箱</a></li>
+                        <li>注册邮箱: {{ request.session.email }} </li>
                         <li>上次登录时间: {{ request.session.last_login_time }}</li>
-                        <li><a href="#">修改密码</a></li>
+                        <li><a href="{% url 'change_pwd' %}">修改密码</a>&nbsp;&nbsp;<a href="{% url 'change_email' %}">更换邮箱</a></li>
                     </ul>
                 </div>
             </div>

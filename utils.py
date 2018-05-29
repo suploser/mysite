@@ -1,7 +1,7 @@
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 
 def send_confirm_email(email, token, referer='/'):
-    from django.core.mail import EmailMultiAlternatives
     subject = '注册确定邮件'
     text_content = '''
         感谢注册,但你的邮箱服务器不支持html链接功能,请联系管理员!
@@ -28,3 +28,15 @@ def make_confirm_string(str):
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     token = hash_token(str, now)
     return token
+
+# 发送验证码邮件
+def send_email_code(email, token):
+    subject = '邮箱验证码'
+    text_content = '''
+        你的邮箱服务器不支持html链接功能,请联系管理员!
+    '''
+    html_content = '您的验证码是%s, 有效期为10分钟，请及时填写!'%token
+    msg = EmailMultiAlternatives(subject, text_content, settings.EMAIL_HOST_USER, [email])
+    msg.attach_alternative(html_content, 'text/html')
+    # 邮件发送异常不报错
+    msg.send(True)

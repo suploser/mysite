@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_user_tag %}
+{% block title %}修改邮箱{% endblock %}
+{% block header_extends %}
+<link rel="stylesheet" href="{% static 'css/pwd.css' %}">
+{% endblock %}
+{% block content %}
+{% if not request.session.username %}
+    <h4 style="text-align: center;">您还没有登录, 请登录后进行修改！</h4>
+    <script>
+        window.setTimeout('window.location.href="/"', 1000);
+    </script>
+{% else %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 col-md-offset-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span>修改邮箱</span>
+                    </div>
+                    <div class="panel-body">
+                        <form action="javascript:void(0);" id="change_email">   {% csrf_token %}
+                            {% get_change_email_form as form %}
+                            {% for field in form %}
+                                <label for="{{field.id_for_label}}">{{field.label}}</label>
+                                {{ field }}
+                                <p id="{{ field.id_for_label }}_error" class="text-danger"></p>
+                            {% endfor %}
+                        </form>
+                        <button class="btn btn-default pull-right" onclick="submit(this)">
+                            提交
+                        </button>
+                        <button class="btn btn-default pull-right" style="margin-right: 1em;" onclick="get_check_code(this)">获取验证码</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+{% block scriptarea %}
+<script>
+    var time_count=30;
+    function get_check_code(obj){
+        $('.text-danger').text('');
+        email = $('#id_new_email').val();
+        if (email.trim() == ''){
+            $('#id_new_email_error').text('邮箱不能为空');
+            return ;
+        }else{
+            $(obj).addClass('disabled');
+        }
+        $.ajax({
+            url: '{% url "get_check_code_1" %}',
+            type: 'GET',
+            data: {'email':email},
+            cache: false,
+            // 箭头函数，this无作用域的限制
+            success: data=>{
+                if(data.status == 'Success'){
+                    alert(data.message);
+                    // 倒计时
+                    var interval = setInterval(function(){
+                        if(time_count <= 0){
+                            clearInterval(interval);
+                            $(obj).text('获取验证码');
+                            $(obj).removeClass('disabled');
+                            time_count = 30;
+                            return ; 
+                        }
+                        time_count -- ;
+                        $(obj).text(time_count+'秒后获取');
+                    }, 1000);
+                }else{
+                    $(obj).removeClass('disabled');
+                    alert(data.message);
+                }
+            },
+            error: xhr=>{
+                $(obj).removeClass('disabled');
+            }
+        })
+    }
+    function submit(obj){
+        $('.text-danger').text('');
+        $(obj).addClass('disabled');
+        data = $('#change_email').serialize();
+        $.ajax({
+            url: '{% url "change_email" %}',
+            type: 'POST',
+            data: data,
+            cache: false,
+            success: data=>{
+                if(data.status=='Success'){
+                    alert(data.message);
+                    $(obj).removeClass('disabled');
+                    window.location.href = '/';
+                }else{
+                    $(obj).removeClass('disabled');
+                    if(data.message != undefined){
+                        alert(data.message);
+                    }
+                    if(data.new_email_error != ''){
+                        $('#id_new_email_error').text(data.new_email_error);
+                        return;
+                    }
+                    if(data.check_code_error != ''){
+                        $('#id_check_code_error').text(data.check_code_error);
+                        return;
+                    }
+                }
+            },
+            error: xhr=>{
+                $(obj).removeClass('disabled');
+            }
+        });
+    }
+</script>
+{% endblock %}
