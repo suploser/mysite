@@ -56,10 +56,12 @@
                 success: function(data){
                     console.log(data.status);
                     if(data.status=='Success'){
-                        
                         alert(data.message);
                         window.location.href = '/';
                     }else{
+                        if(data.message != undefined){
+                            alert(data.message);
+                        }
                         if(data.old_pwd_error != ''){
                             $('#id_old_pwd_error').text(data.old_pwd_error);
                             return;
