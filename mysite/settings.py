@@ -137,7 +137,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.163.com'
 EMAIL_PORT = 25
 EMAIL_HOST_USER = 'sup_loser@163.com'
-EMAIL_HOST_PASSWORD = '1321131987qx'
+EMAIL_HOST_PASSWORD = '*******'
 CONFIRM_DAYS = 5
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
