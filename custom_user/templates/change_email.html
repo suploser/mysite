@@ -45,6 +45,7 @@
     function get_check_code(obj){
         $('.text-danger').text('');
         email = $('#id_new_email').val();
+        // 邮箱验证
         if (email.trim() == ''){
             $('#id_new_email_error').text('邮箱不能为空');
             return ;
@@ -98,9 +99,12 @@
                     window.location.href = '/';
                 }else{
                     $(obj).removeClass('disabled');
-                    if(data.message != undefined){
-                        alert(data.message);
-                    }
+                    // if(data.message != undefined){
+                    //     // 未登录（session过期）跳转至首页
+                    //     alert(data.message);
+                    //     window.location.href = '/';
+                    //     return;
+                    // }
                     if(data.new_email_error != ''){
                         $('#id_new_email_error').text(data.new_email_error);
                         return;
