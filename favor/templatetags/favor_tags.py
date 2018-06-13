@@ -13,6 +13,7 @@ def get_favor_num(obj):
 
 @register.simple_tag
 def get_favor_status(obj, request):
+    # 获取某用户的点赞状态
     content_type = ContentType.objects.get_for_model(model=obj)
     if not request.session.get('username'):
         return ''
