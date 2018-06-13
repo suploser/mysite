@@ -131,6 +131,7 @@
         $(this).addClass('disabled');
         $(this).text('上传中...')
         // or document.getElementById('avatar_form')
+        // 表单数据(文件和数据)
         var data = new FormData($('#avatar_form')[0]);
         console.log(data);
         $.ajax({
