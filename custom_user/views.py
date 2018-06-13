@@ -1,4 +1,4 @@
-import string, random
+import string, random, os, uuid
 from datetime import timedelta
 from datetime import datetime
 from django.utils import timezone
@@ -13,10 +13,13 @@ from .forms import loginForm, RegForm, ForgetPwdForm, ChangePwdForm, ChangeEmail
 import utils
 # Create your views here.
 # 登录信息写入session
+
 def write_to_session(request, user):
     request.session.set_expiry(0)
+    # 动态绑定方法
     request.session['username'] = user.username
-    request.session['nickname'] = user.userprofile.nickname
+    # request.session['nickname'] = user.userprofile.nickname
+    request.session['avatar_url'] = user.get_avatar_url()
     request.session['password'] = user.password
     request.session['is_supuser'] = user.is_supuser
     request.session['email'] = user.email
@@ -199,20 +202,28 @@ def reset_pwd(request):
     return render(request, 'reset_pwd.html')
 
 # 判断是否登录的装饰器
-def is_login(func):
-    def wrapper(request):
-        data = {}
-        try:
-            if not request.session.get('username'):
-                raise Exception('您还未登录')
-            return func(request) 
-        except Exception as e:
-            data['status'] = 'Fail'
-            data['message'] = str(e)
-            return JsonResponse(data)
-    return wrapper
+def is_login(is_json=False):
+    def _is_login(func):
+        def wrapper(request):
+            data = {}
+            try:
+                if not request.session.get('username'):
+                    print('*********')
+                    raise Exception('您还未登录')
+                return func(request) 
+            except Exception as e:
+                if is_json:
+                    data['status'] = 'Fail'
+                    data['message'] = str(e)
+                    return JsonResponse(data)
+                else:
+                    # 返回消息页面
+                    data['message'] = '您还未登录'
+                    return render(request, 'message.html', context=data)
+        return wrapper
+    return _is_login
 
-@is_login
+@is_login()
 def change_pwd(request):
     if request.method == 'POST':
         data = {}
@@ -235,6 +246,7 @@ def change_pwd(request):
         data['new_pwd_again_error'] = get_error('new_pwd_again', c_form)
         data['non_field_error'] = ','.join(c_form.non_field_errors())
         return JsonResponse(data)
+    # get方式获取
     return render(request, 'change_pwd.html')
 
 # 获取验证码
@@ -261,7 +273,7 @@ def get_check_code_1(request):
     finally:
         return JsonResponse(data)
 
-@is_login
+@is_login()
 def change_email(request):
     data = {}
     if request.method == 'POST':
@@ -272,6 +284,7 @@ def change_email(request):
             user = User.objects.get(username=username)
             user.email = new_email
             user.save()
+            # 移除
             request.session.pop('check_code')
             request.session.pop('check_code_time')
             request.session['email'] = user.email
@@ -284,3 +297,51 @@ def change_email(request):
         data['check_code_error'] = get_error('check_code', change_email_from)
         return JsonResponse(data)
     return render(request, 'change_email.html')
+
+@is_login()
+def user_avatar(request):
+    username = request.session.get('username')
+    user = User.objects.get(username=username)
+    return render(request, 'user_avatar.html',{'user':user})
+
+@is_login()
+def avatar_upload(request):
+    if request.method == 'POST':
+        data = {}
+        if request.FILES.get('avatar_file'):
+            avatar_file = request.FILES['avatar_file']
+            temp_floder = os.path.join(settings.BASE_DIR, 'media', 'temp')
+            if not os.path.isdir(temp_floder):
+                os.makedirs(temp_floder)
+            temp_filename = uuid.uuid1().hex + os.path.splitext(avatar_file.name)[-1]
+            temp_path = os.path.join(temp_floder, temp_filename)
+            with open(temp_path, 'wb') as f:
+                for chunk in avatar_file.chunks():
+                    f.write(chunk)
+        else:
+            # 未选择图片
+            data['status'] = 'Fail'
+            data['message'] = '您还未选择图片'
+            return JsonResponse(data)
+        left = int(float(request.POST['avatar_x']))
+        top = int(float(request.POST['avatar_y']))
+        right = left + int(float(request.POST['avatar_width']))
+        bottom = top + int(float(request.POST['avatar_height']))
+        from PIL import Image
+        avatar = Image.open(temp_path)
+        # 裁剪
+        crop_avatar = avatar.convert('RGBA').crop((left, top, right, bottom)).\
+        resize((64,64), Image.ANTIALIAS)
+        crop_avatar.save(temp_path)
+        # 背景白色
+        # out = Image.new('RGBA', crop_avatar.size, (255,255,255))
+        # out.paste(crop_avatar, (0,0,64,64))
+        # out.save(temp_path)
+        user = User.objects.get(username=request.session.get('username'))
+        user.set_avatar_url(temp_path)
+        # ....
+        os.remove(temp_path)
+        data['status'] = 'Success'
+        data['message'] = user.get_avatar_url()
+        request.session['avatar_url'] = user.get_avatar_url()
+        return JsonResponse(data)

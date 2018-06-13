@@ -15,4 +15,6 @@ urlpatterns = [
     path('change_pwd/', views.change_pwd, name='change_pwd'),
     path('get_check_code_1/', views.get_check_code_1, name='get_check_code_1'),
     path('change_email/', views.change_email, name='change_email'),
+    path('user_avatar/', views.user_avatar, name='user_avatar'),
+    path('avatar_upload/', views.avatar_upload, name='avatar_upload'),
 ]

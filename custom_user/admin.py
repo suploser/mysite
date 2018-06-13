@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import User, ConfirmString, UserProfile, CheckCode
+from .models import User, ConfirmString, UserProfile, CheckCode,UserAvatar
 # Register your models here.
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'nickname', 'password', 'email','has_confirmed', 'is_supuser')
+    list_display = ('id','username', 'nickname', 'password', 'email','has_confirmed', 'is_supuser')
     # 获取外键的字段值
     # def username(self, obj):
     #     return '123'
@@ -22,3 +22,6 @@ class UserProfileAdmin(admin.ModelAdmin):
 class CheckCodeAdmin(admin.ModelAdmin):
     list_display = ('user', 'check_code', 'created_time')
 
+@admin.register(UserAvatar)
+class UserAvatarAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'avatar')

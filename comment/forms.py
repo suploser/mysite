@@ -11,8 +11,9 @@ class CommentForm(forms.Form):
         widget=CKEditorWidget(config_name='comment_ckeditor'),
         error_messages={'required':'评论内容不能为空!'}
         )
+    # 回复的评论的id
     reply_comment_id = forms.IntegerField(widget=forms.HiddenInput(attrs=
-        {'id':'reply_comment_id'}))
+        {'id':'reply_comment_id', 'value':'0'}))
 
     # 获取session
     def __init__(self, *args, **kwords):
@@ -52,6 +53,7 @@ class CommentForm(forms.Form):
             self.cleaned_data['parent'] = None
         else:
             if Comment.objects.filter(id=reply_comment_id).exists():
+                # 上级评论
                 self.cleaned_data['parent'] = Comment.objects.get(id=reply_comment_id)
             else:
                 raise ValidationError('回复错误')

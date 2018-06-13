@@ -30,7 +30,7 @@
                    <!--  {% autoescape off %}<div class="blog-content">{{ blog.content}}
                     </div>{% endautoescape %} -->
                     <div class="favor" onclick="favor_count(this, 'blog', 
-                    {{ blog.id }})">
+                    '{{ blog.id }}')">
                         <span class="glyphicon glyphicon-thumbs-up {% get_favor_status blog request %}"></span>
                         <span class="favor_num">{% get_favor_num blog %}</span>
                         <span>喜欢</span>
@@ -62,7 +62,7 @@
                     <!-- sessionkey可能还存在于session表中,但没有对应的键值 -->
                     <div class="panel-body">
                         {% if request.session.username %}
-                            <form id="comment-form" action="{% url 'update_comment' %}" method="POST" style="overflow:hidden;">
+                            <form id="comment-form" style="overflow:hidden;">
                                 {% csrf_token %}
                                 <label>{{ request.session.username }}~,欢迎评论！！</label> 
                                 <div id="reply-content-container" style="display: none">
@@ -76,8 +76,10 @@
                                     {{ field }}
                                 {% endfor %}
                                 <span id='comment-error' class='text-danger pull-left'></span>
-                                <input type="submit" class="btn btn-primary" value="提交" style="float: right;"> 
                             </form>
+                             <button id="submit_comment" type="button" class="btn btn-primary"  style="float: right;">
+                                 评论
+                             </button>
                         {% else %}
                             <h4>未登录,请登录后评论!</h4>
                             <a href="{% url 'login' %}?from={{ request.get_full_path }}" class="btn btn-primary">登录</a>&nbsp;或&nbsp;<a href="{% url 'regist' %}?from={{ request.get_full_path }}" class="btn btn-danger">注册</a>
@@ -102,8 +104,9 @@
                         {% get_comments blog as comments %}
                         {% for comment in comments %}
                             <div id="root-{{ comment.id }}" class="comment">
-                                <span id="user-{{comment.id}}"}>{{comment.user}}</span>&nbsp;({{comment.create_time | date:"Y-m-d H:i:s"}}):&nbsp;
-                                <div id="comment-{{ comment.id }}">
+                                <span id="user-{{comment.id}}">
+                                    <img src="{{ comment.user.get_avatar_url }}" width="32px" class="img-circle">{{comment.user}}</span>&nbsp;({{comment.create_time | date:"Y-m-d H:i:s"}}):&nbsp;
+                                <div id="comment-{{ comment.id }}" style="padding-left: 3em;">
                                     {{ comment.content | safe}}
                                 </div>
                                 <div class="favor" onclick="favor_count(this, 'comment', {{ comment.id }})">
@@ -111,14 +114,14 @@
                                     <span class="favor_num">{% get_favor_num comment %}</span>
                                     
                                 </div>
-                                <a href="{% if request.session.username %}javascript:reply({{ reply.id }});{% else %}javascript:void(0);{% endif %}"">回复</a>
+                                <a href="{% if request.session.username %}javascript:reply({{ comment.id }});{% else %}javascript:void(0);{% endif %}"">回复</a>
                                 {% for reply in comment.root_comment.all %}
                                 <div class="reply">
-                                    <span id="user-{{reply.id}}">{{ reply.user.username }}</span>&nbsp;({{ reply.create_time | date:"Y-m-d H:i:s" }})回复: <span>{{reply.reply_to.username }}</span>&nbsp;
-                                    <div id="comment-{{ reply.id }}">
+                                    <span id="user-{{reply.id}}"><img src="{{reply.user.get_avatar_url}}" class="img-circle" width="32px">{{ reply.user.username }}</span>&nbsp;({{ reply.create_time | date:"Y-m-d H:i:s" }})回复: <span>{{reply.reply_to.username }}</span>&nbsp;
+                                    <div id="comment-{{ reply.id }}" style="padding-left: 3em">
                                         {{ reply.content | safe }}
                                     </div>
-                                    <div class="favor" onclick="favor_count(this, 'comment', {{ reply.id }})">
+                                    <div class="favor" onclick="favor_count(this, 'comment', '{{ reply.id }}')">
                                         <span class="glyphicon glyphicon-thumbs-up {% get_favor_status reply request %}"></span>
                                         <span class="favor_num">{% get_favor_num reply %}</span>
                                     </div>
@@ -151,21 +154,23 @@
         }
         return str;
     }
-    $("#comment-form").submit(function(){
+    // 防止重复请求
+    $("#submit_comment").unbind('click').click(function(){
         $('#comment-error').text('')
         // 更新评论内容到textarea
         CKEDITOR.instances.id_comment_content.updateElement();
-        console.log($(this).serialize())
+        console.log($('#comment-form').serialize())
         // if(CKEDITOR.instances.id_comment_content.document.getBody().getText().trim()==''){
         //     $('#comment-error').text('评论内容不能为空');
         //     return false;
         // };
+        $(this).addClass('disabled');
         $.ajax({
         url: "{% url 'update_comment' %}",
         type: "POST",
-        data: $(this).serialize(),
+        data: $('#comment-form').serialize(),
         cache: false,
-        success: function(data){
+        success: data=>{
             console.log(data.status);
             if(data.status == 'SUCCESS'){
                 $('#point').remove();
@@ -175,33 +180,37 @@
                     // 前端拼接
                 var comment_html = 
                     '<div id="root-{0}" class="comment">'+
+                    '<img src="{4}" width="32px"  class="img-circle"/>'+
                     '<span id="user-{0}">{1}</span>({2}):'+
-                    '<div id="comment-{0}">{3}</div>'+
+                    '<div id="comment-{0}" style="padding-left:3em;">{3}</div>'+
                     '<div class="favor" onclick="favor_count(this,\'comment\',{0})">'+
                     '<span class="glyphicon glyphicon-thumbs-up"></span> '+
                     '<span class="favor_num">0</span>'+
                     '</div>'+
                     ' <a href="javascript:reply({0});"> 回复</a></div>';
 
-                var comment_html = comment_html.format(data.id, data.username, data.comment_time, data.comment_content)
+                var comment_html = comment_html.format(data.id, data.username, data.comment_time, data.comment_content, data.avatar_url)
                  $('#comment-list').prepend(comment_html);
                 }else{
                     //回复
                     // $('a').parent(selctor)
                 var reply_html = 
                 '<div class="reply">'+
-                '<span id="user-{0}">{1}</span> ({2})回复:<span>{3}</span>'+
-                '<div id="comment-{0}">{4}</div>'+
+                '<img src="{5}" class="img-circle" width="32px"/>'+
+                '<span id="user-{0}">{1}</span> ({2})回复: '+
+                '<span>{3}</span>'+
+                '<div id="comment-{0}" style="padding-left:3em;">{4}</div>'+
                 '<div class="favor" onclick="favor_count(this,\'comment\',{0})">'+
                 '<span class="glyphicon glyphicon-thumbs-up"></span> '+
                 '<span class="favor_num">0</span>'+
                 '</div>'+
                 ' <a href="javascript:reply({0});">回复</a></div>';
-                 var reply_html = reply_html.format(data.id, data.username, data.comment_time, data.reply_to, data.comment_content);
+                 var reply_html = reply_html.format(data.id, data.username, data.comment_time, data.reply_to, data.comment_content, data.avatar_url, data.reply_avatar_url);
                  $('#root-'+data.root_id).append(reply_html)
                 }
                 $('#reply-content-container').hide();
                 $('#reply_comment_id').val('0');
+                $(this).removeClass('disabled');
                 CKEDITOR.instances.id_comment_content.setData('')
             }else{
                 $('#comment-error').text(data.message)
@@ -225,12 +234,14 @@
         $('html').animate({scrollTop: $('#comment-form').offset().top - 60}, 300, function(){
             CKEDITOR.instances.id_comment_content.focus();
         });
-        var username = $('#user-'+reply_comment_id).html();
-        $('#username-area').html(username);
+        var username = $('#user-'+reply_comment_id).text();
+        $('#username-area').text(username);
     }
     //取消回复
     function cancel(){
         $('#reply-content-container').hide();
+        // 修改为root评论
+        $('#reply_comment_id').val('0');
         CKEDITOR.instances.id_comment_content.setData('');
     }
     function favor_count(obj, content_type, object_id){
