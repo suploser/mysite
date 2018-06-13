@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}修改头像{% endblock %}
+{% block header_extends %}
+<link rel="stylesheet" href="{% static 'cropper/cropper.css' %}">
+<link rel="stylesheet" href="{% static 'css/user_avatar.css' %}">
+<script src="{% static 'cropper/cropper.js' %}"></script>
+{% endblock %}
+{% block content %}
+<div class="container">
+    <p id="tip_text" class="alert alert-success">选择图片 → 编辑 → 上传</p>
+    <div class="row">
+        <div class="col-md-10">
+            <div class="avatar-wrapper">
+                <img src="">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="avatar-preview">
+                <img src="{{user.get_avatar_url}}" width="96px" height="96px">
+            </div>
+            <a href="javascript:void(0);" id="avatar_upload" class="btn btn-primary disabled">上传头像</a>
+        </div>
+    </div>
+    <div>
+        <label for="avatar_input" class="btn btn-primary">本地图片</label>
+       
+       <div class="btn-group tool">
+            <button id="zoom_in" class="btn btn-primary disabled" title="放大">
+                <span class="glyphicon glyphicon-zoom-in"></span>
+            </button>
+            <button id="zoom_out" class="btn btn-primary disabled" title="缩小">
+                <span class="glyphicon glyphicon-zoom-out"></span>
+            </button>
+            <button id="reset" class="btn btn-default disabled" title="重置">
+                <span class="glyphicon glyphicon-refresh"></span>
+            </button>
+       </div>
+    </div>
+</div>
+<form id="avatar_form">
+    {% csrf_token %}
+    <input style="display: none" type="file" id="avatar_input" name="avatar_file" accept=".png">
+    <input type="hidden" id="avatar_x" name="avatar_x">
+    <input type="hidden" id="avatar_y" name="avatar_y">
+    <input type="hidden" id="avatar_width" name="avatar_width">
+    <input type="hidden" id="avatar_height" name="avatar_height">
+</form>
+{% endblock %}
+{% block scriptarea %}
+<script>
+    var image = $('.avatar-wrapper img');
+    // options
+    image.cropper({
+        // 检查图片来源
+        checkImageOrigin: true,
+        // 图片可移动
+        dragMode: 'move',
+        // 窗体调整大小后不自动回复才将区域
+        restore:false,
+        // 不允许通过鼠标滚轮缩放
+        zoomOnWheel:false,
+        //不允许通过触摸缩放
+        zoomOnTouch:false,
+        //裁剪比例
+        aspectRatio:1/1,
+        //自动裁剪的比例
+        autoCropArea:1,
+        // 预览
+        preview: $('.avatar-preview').selector,
+        // 返回图片的裁剪数据
+        crop: function(e){
+            $('#avatar_x').val(e.detail.x);
+            $('#avatar_y').val(e.detail.y);
+            $('#avatar_width').val(e.detail.width);
+            $('#avatar_height').val(e.detail.height);
+        },
+    });
+    // 提示
+    function tip(message, status){
+        $('#tip_text').text(message);
+        $('#tip_text').attr('class', 'alert alert-'+status);
+    }
+    // 缩放与复位
+    var zoom = 1;
+    $('#zoom_in').click(function(){
+        if(zoom<1.5){
+            zoom += 0.1;
+            image.cropper('zoom', 0.1);
+        }
+    });
+    $('#zoom_out').click(function(){
+        if(zoom>0.5){
+            zoom -= 0.1;
+            image.cropper('zoom', -0.1);
+        }
+    });
+    $('#reset').click(function(){
+        image.cropper('reset');
+        zoom = 1;
+    });
+    $('#avatar_input').change(function(){
+        // 加载本地图片
+        var URL = window.URL || window.webkitURL;
+        if(URL != undefined){
+            // file对象,
+            // or var files = $(this)[0].files[0];
+            var files = this.files;
+            if(files.length>0 && files!=undefined){
+                var file = files[0];
+                // 类型判断image
+                if(/^image\/\w+/.test(file.type)){
+                    // 图片链接 blob
+                    var blobURL = URL.createObjectURL(file);
+                    // console.log(blobURL);
+                    // 替换
+                    image.cropper('reset').cropper('replace', blobURL);
+                    $('.container .disabled').removeClass('disabled');
+                    tip('请调整图片最佳状态后上传', 'normal');
+                }else{
+                    tip('请选择一张图片','danger');
+                }
+            }
+        }
+    });
+    $('#avatar_upload').unbind('click').click(function(){
+        if($('.avatar-wrapper img').attr('src')==''){
+            tip('请选择图片后上传', 'normal');
+            return;
+        }
+        $(this).addClass('disabled');
+        $(this).text('上传中...')
+        // or document.getElementById('avatar_form')
+        // 表单数据(文件和数据)
+        var data = new FormData($('#avatar_form')[0]);
+        console.log(data);
+        $.ajax({
+            url: "{% url 'avatar_upload' %}",
+            type: 'POST',
+            cache: false,
+            data: data,
+            processData: false,
+            contentType: false,
+            success: data=>{
+                $(this).removeClass('disabled');
+                $(this).text('上传头像');
+                if(data.status == 'Success'){
+                    tip('头像修改成功', 'success');
+                    $('#info img').attr('src', data.message);
+                }else{
+                    console.log(data)
+                    tip(data.message, 'normal');
+                }
+            },
+            error: function(xhr, err){
+                tip('上传失败,'+err, 'danger');
+            }
+        });
+    })
+</script>
+{% endblock %}
