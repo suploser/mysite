@@ -59,9 +59,12 @@
                         alert(data.message);
                         window.location.href = '/';
                     }else{
-                        if(data.message != undefined){
-                            alert(data.message);
-                        }
+                        // if(data.message != undefined){
+                        //     // 未登录(session过期)跳转至首页
+                        //     alert(data.message);
+                        //     window.location.href = '/';
+                        //     return;
+                        // }
                         if(data.old_pwd_error != ''){
                             $('#id_old_pwd_error').text(data.old_pwd_error);
                             return;
