@@ -71,7 +71,7 @@ div.favor {
     display: inline-block;
     margin-left: 0.5em;
 }
-
+/*点赞激活状态*/
 span.active {
     color: red;
 }
