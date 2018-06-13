@@ -17,6 +17,7 @@
     {% block header_extends %}{% endblock %}
 </head>
 <body>
+  <a href="javascript:void(0);" class="scrollTop" style="display: none" title="返回顶部"><span class="glyphicon glyphicon-arrow-up"></span></a>
     <nav class="navbar navbar-default navbar-fixed-top">
         <div class="container-fluid">
             <div class="navbar-header">
@@ -34,16 +35,17 @@
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                 {% if request.session.username %}
-                    <div class="btn-group">
-                      <button type="button" id="info" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">您好,{{ request.session.username }} <span class="caret"></span></button>
-                      <ul class="dropdown-menu">
-                        <li><a href="{% url 'user_info' %}">个人中心</a></li>
-                        {% if request.session.is_supuser %}
-                        <li><a href="{% url 'blog_add' %}">发表博文</a></li>
-                        {% endif %}
-                        <li><a href="{% url 'logout' %}">注销</a></li>
-                      </ul>
-                    </div>
+                <li class="dropdown" role="presentation">
+                    <a role="button" id="info" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="{{request.session.avatar_url}}" class="img-rounded">您好,{{ request.session.username }} <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      <li><a href="{% url 'user_info' %}">个人中心</a></li>
+                      <li><a href="{% url 'user_avatar' %}">修改头像</a></li>
+                      {% if request.session.is_supuser %}
+                      <li><a href="{% url 'blog_add' %}">发表博文</a></li>
+                      {% endif %}
+                      <li><a href="{% url 'logout' %}">注销</a></li>
+                    </ul>
+                  </li>
                     <!-- <li><a href="javascript:void(0)">{{ request.session.username }}~~,欢迎</a></li>
                     <li><a href="{% url 'logout' %}">注销</a></li> -->
                 {% else %}
@@ -56,6 +58,11 @@
 
     
     {% block content %}{% endblock %}
+    <div class="footer">
+      <div class="copyright">
+        <span style="font-size:1.1em">welcome to visit my website©sup_loser</span>
+      </div>
+    </div>
     <!-- 登陆模态框 -->
     <div class="modal fade" id="login" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-sm">
@@ -211,7 +218,17 @@
         });
       });
       prettyPrint();
-      
+      window.onscroll = function(){
+        var t = $('html').scrollTop();
+        if(t>=300){
+          $('.scrollTop').fadeIn(500);
+        }else{
+          $('.scrollTop').fadeOut(500);
+        }
+      }
+      $('a.scrollTop').click(function(){
+        $('html').animate({scrollTop:'0'}, 500);
+      })
     </script>
     {% block scriptarea %}{% endblock %}
 </body> 
