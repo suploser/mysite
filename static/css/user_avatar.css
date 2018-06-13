@@ -1,0 +1,64 @@
+.avatar-wrapper {
+  height: 370px;
+  width: 100%;
+  margin-top: 15px;
+  box-shadow: inset 0 0 5px rgba(0,0,0,.25);
+  background-color: #fcfcfc;
+  overflow: hidden;
+}
+ 
+.avatar-wrapper img { 
+  display: block;
+  height: auto; 
+  max-width: 100%;
+}
+ 
+.avatar-preview {
+  margin-top: 15px;
+  margin-right: 15px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  background-color: #fff;
+  overflow: hidden;
+  height: 96px;
+  width: 96px;
+}
+/*伪类*/
+.avatar-preview:hover 
+{ 
+  border-color: #ccf; 
+  box-shadow: 0 0 5px rgba(0,0,0,.15);
+}
+a#avatar_upload {
+  margin-left: 7px;
+  margin-top: 8px;
+}
+/*tip_text的样式*/
+.alert{
+  padding: 15px;
+  margin-bottom: 20px;
+  border:1px solid ;
+  border-radius: 4px;
+}
+.alert-success{
+  color: #3c763d;
+  background-color: #dff0d8;
+  border-color: #d6e9c6;
+}
+.alert-normal{
+  color: #31708f;
+  background-color: #d9edf7;
+  border-color: #bce8f1;
+}
+.alert-danger{
+  color: #a94442;
+  background-color: #f2dede;
+  border-color: #ebccd1;
+}
+label.btn-primary{
+  margin-top: 1em;
+}
+div.tool{
+  margin-top: 1em;
+  margin-left: 1em;
+}
