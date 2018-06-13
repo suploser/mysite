@@ -5,6 +5,7 @@ from django.http import JsonResponse, HttpResponse
 from .models import Comment
 from comment.forms import CommentForm
 # Create your views here.
+# 写一个装饰器来验证是否登录
 def update_comment(request):
     data={}
     comment_form = CommentForm(request.POST, session=request.session)
@@ -22,7 +23,9 @@ def update_comment(request):
         comment.save()
         data['status'] = 'SUCCESS'
         data['username'] = comment.user.username
+        data['avatar_url'] = comment.user.get_avatar_url()
         data['reply_to'] = comment.reply_to.username if parent else ''
+        data['reply_avatar_url'] = comment.reply_to.get_avatar_url() if parent else ''
         data['id'] = comment.id
         data['root_id'] = comment.root.id if parent else ''
         from datetime import datetime
