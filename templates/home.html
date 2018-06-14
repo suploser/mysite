@@ -1,12 +1,15 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+{% load blog_custom_tags %}
 {% block title %}我的站点|首页{% endblock %}
 {% block header_extends %}
     <!-- {{ read_num_list }}
     {{ date_list }} -->
-    <link rel="stylesheet" type="text/css" href={% static 'home_content.css' %}>
+<link rel="stylesheet" type="text/css" href={% static 'home_content.css' %}>
     <!-- highcharts -->
-    <script src="{% static 'js/highcharts.js' %}"></script>
+<script src="{% static 'js/highcharts.js' %}"></script>
+<script src="{% static 'assets/js/amazeui.min.js' %}"></script>
+<link rel="stylesheet" href="{% static 'assets/css/amazeui.min.css' %}">
 {% endblock %}
 {% block content %}
     <h3 class="home_content">欢迎来到我的博客，#-#</h3>  
@@ -58,6 +61,50 @@
         // 图表初始化
         var chart = Highcharts.chart('container', options);
     </script> 
+     <a href="#sidebar" data-am-offcanvas>
+        <div class="about">
+        <span class="glyphicon glyphicon-menu-hamburger" title="关于我"></span>
+        </div>
+    </a>
+    <div id="sidebar" class="am-offcanvas">
+        <div class="am-offcanvas-bar">
+            <div class="am-offcanvas-content">
+                <div class="admin-avatar">
+                <img src="/media/avatar/21_64_6.png" class="img-circle">
+                </div>
+                <div class="admin-info">
+                <ul>
+                <li>
+                    <p>人生苦短</p>
+                    <p>我不生产代码,我只做代码的搬运工!嘻嘻！</p>
+                </li>
+                <li style="text-align: center;">
+                    <a href="https://github.com/suploser" target="blank" class="am-icon-github am-icon-md"></a>
+                    <a href="https://weibo.com/2509233767" target="blank" class="am-icon-weibo am-icon-md"></a>
+                </li>
+                </ul>
+                </div>
+                <div class="site-info">
+                <table class="am-table">
+                    <thead>
+                    <tr>
+                    <th style="text-align: center;">博客数</th>
+                    <th style="text-align: center;">访问量</th>
+                    <th style="text-align: center;">建站时长</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>{% get_blog_nums %}</td>
+                        <td>{{ view_counts }}</td>
+                        <td>{% get_create_time %}天</td>
+                    </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="container">
         <div class="row">
             <div class="col-xs-4 col-md-4">
@@ -102,3 +149,5 @@
     <!-- {{ request.session.session_key }} -->
 {% endblock %}
 {% block home_active %}active{% endblock %}
+{% block scriptarea %}
+{% endblock %}
