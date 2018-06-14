@@ -19,3 +19,48 @@ div#container {
 div.hot-blog {
   text-align: center;
 }
+.about{
+  position: fixed;
+  left:1em;
+  top:5em;
+  border-radius: 4px;
+  border:1px solid #dbdfe6;
+}
+.about:hover{
+  opacity: 0.5;
+}
+.glyphicon-menu-hamburger{
+  padding: 0.5em 0.7em;
+  color:#9fa3aa;
+}
+div.admin-avatar{
+  text-align: center;
+  padding-top: 2em;
+}
+div.admin-avatar img:hover{
+  opacity: 0.6;
+}
+div.admin-info{
+  padding-top: 2em;
+}
+div.admin-info ul{
+  padding-left: 0;
+}
+div.admin-info p{
+  text-align: center;
+}
+div.am-offcanvas-bar{
+  opacity: 0.7;
+}
+div.site-info{
+  position: absolute;
+  bottom: 0.1em;
+  left:0;
+  right:0;
+}
+div.site-info div.title{
+  border-top: 1px solid ;
+}
+td {
+  text-align: center;
+}
