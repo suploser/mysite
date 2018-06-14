@@ -112,6 +112,7 @@ def blog_add(request):
         data={}
         try:
             post_data = check_post_data(request)
+            # 新建博客
             blog = Blog()
             blog.title = post_data['title']
             blog.content = post_data['content']
