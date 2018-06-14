@@ -7,6 +7,7 @@
     <script type="text/javascript" src="/ueditor/UE/lang/zh-cn/zh-cn.js"></script>
     <script type="text/javascript">
         var ue = UE.getEditor('editor');
+        // 加载博客内容
         ue.ready(function(){
              $.ajax({
                 url:"{% url 'ajax_get_content' blog.id %}",
