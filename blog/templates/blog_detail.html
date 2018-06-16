@@ -116,7 +116,7 @@
                                 </div>
                                 <a href="{% if request.session.username %}javascript:reply({{ comment.id }});{% else %}javascript:void(0);{% endif %}"">回复</a>
                                 {% for reply in comment.root_comment.all %}
-                                <div class="reply">
+                                <div class="reply"">
                                     <span id="user-{{reply.id}}"><img src="{{reply.user.get_avatar_url}}" class="img-circle" width="32px">{{ reply.user.username }}</span>&nbsp;({{ reply.create_time | date:"Y-m-d H:i:s" }})回复: <span>{{reply.reply_to.username }}</span>&nbsp;
                                     <div id="comment-{{ reply.id }}" style="padding-left: 3em">
                                         {{ reply.content | safe }}
@@ -234,6 +234,7 @@
         $('html').animate({scrollTop: $('#comment-form').offset().top - 60}, 300, function(){
             CKEDITOR.instances.id_comment_content.focus();
         });
+        // 获取回复的用户名
         var username = $('#user-'+reply_comment_id).text();
         $('#username-area').text(username);
     }
@@ -275,7 +276,14 @@
             }
         });
     }
+    if(window.location.hash != ''){
+        comment_id = window.location.hash.split('#')[1];
+        // 定位到评论位置
+        $('html').animate({scrollTop:$('#comment-'+comment_id).offset().top-150}, 300);
+    }
+
 </script>
+    
 {% endblock %}
 
 {% endblock %}
