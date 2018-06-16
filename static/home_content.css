@@ -41,7 +41,7 @@ div.admin-avatar img:hover{
   opacity: 0.6;
 }
 div.admin-info{
-  padding-top: 2em;
+  padding-top: 1em;
 }
 div.admin-info ul{
   padding-left: 0;
@@ -54,7 +54,7 @@ div.am-offcanvas-bar{
 }
 div.site-info{
   position: absolute;
-  bottom: 0.1em;
+  bottom: 0;
   left:0;
   right:0;
 }
