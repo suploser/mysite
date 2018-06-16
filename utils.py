@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.template import loader
 from django.core.mail import EmailMultiAlternatives
 
 def send_confirm_email(email, token, referer='/'):
@@ -29,7 +30,7 @@ def make_confirm_string(str):
     token = hash_token(str, now)
     return token
 
-# 发送验证码邮件
+# 发送验证码邮件 
 def send_email_code(email, token):
     subject = '邮箱验证码'
     text_content = '''
@@ -40,3 +41,17 @@ def send_email_code(email, token):
     msg.attach_alternative(html_content, 'text/html')
     # 邮件发送异常不报错
     msg.send(True)
+
+class SendEmail(object):
+    def send_html_email(self, subject, html_content, email_to):
+        text_content = '''
+        你的邮箱服务器不支持html链接功能,请联系管理员!
+    '''
+        msg = EmailMultiAlternatives(subject, text_content, settings.EMAIL_HOST_USER, [email_to])
+        msg.attach_alternative(html_content, 'text/html')
+        msg.send()
+
+    def send_email_by_template(self, subject, module, data, email_to):
+        # 将模板转化为字符串
+        html_content = loader.render_to_string(module, data)
+        self.send_html_email(subject, html_content, email_to)
