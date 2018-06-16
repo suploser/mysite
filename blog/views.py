@@ -1,7 +1,7 @@
-from django.shortcuts import render_to_response, render, get_object_or_404
+from django.shortcuts import render_to_response, render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.urls import reverse
 from django.conf import settings
 from .models import Blog, BlogType
@@ -39,6 +39,15 @@ def deal_common(request, blogs):
     context['blog_types'] = blog_types
     context['blog_date_dict'] = blog_date_dict
     return context
+
+def blog_search(request):
+    kw = request.GET.get('kw')
+    if not kw:
+        return redirect('blogs_list')
+    blogs_list = Blog.objects.filter(Q(title__contains=kw) | Q(content__contains=kw))
+    context = deal_common(request, blogs_list)
+    context['kw'] = kw
+    return render(request, 'search_result.html', context=context)
 
 def blogs_list(request):
     blogs_list = Blog.objects.all()
