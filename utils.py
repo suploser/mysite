@@ -11,7 +11,7 @@ def send_confirm_email(email, token, referer='/'):
         <p>感谢注册<a href="http://%s/user/confirm?token=%s&from=%s">个人博客</a></p>
         <p>请点击链接完成注册!</p>
         <p>该链接的有效期为%s天</p>
-    '''%('127.0.0.1:8000', token, referer, settings.CONFIRM_DAYS)
+    '''%(settings.SITE_IP, token, referer, settings.CONFIRM_DAYS)
 
     msg = EmailMultiAlternatives(subject, text_content, settings.EMAIL_HOST_USER, [email])
     msg.attach_alternative(html_content, 'text/html')
