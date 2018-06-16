@@ -1,13 +1,17 @@
 from django.shortcuts import render, redirect
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
+from django.conf import settings
 from django.http import JsonResponse, HttpResponse
 from .models import Comment
 from comment.forms import CommentForm
+from utils import SendEmail
 # Create your views here.
 # 写一个装饰器来验证是否登录
 def update_comment(request):
     data={}
+    send_email = SendEmail()
+    # 填充数据
     comment_form = CommentForm(request.POST, session=request.session)
     if comment_form.is_valid():
         user = comment_form.cleaned_data['user']
@@ -32,7 +36,20 @@ def update_comment(request):
         #时区转换
         data['comment_time'] = datetime.fromtimestamp(comment.create_time.timestamp()).strftime('%Y-%m-%d %H:%M:%S')
         data['comment_content'] = comment.content
-
+        email_data = {
+            'comment_url':'{0}/blog/{1}#{2}'.format(settings.SITE_IP, content_object.id, comment.id),
+            'comment_username':comment.user.username,
+            'comment_content':comment.content
+        }
+        if not data['root_id']:
+            subject = '新的博客评论'
+            module = 'email/comment_email.html'
+            send_email.send_email_by_template(subject, module, email_data, settings.EMAIL_DEFAULT_FROM)
+        else:
+            subject='新回复'
+            module = 'email/reply_email.html'
+            email_to = comment.reply_to.email
+            send_email.send_email_by_template(subject, module, email_data, email_to)
     else:
         data['status'] = 'ERROR'
         # form.errors包括non_field_errors
