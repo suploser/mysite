@@ -14,7 +14,9 @@
     <script tyep="text/javascript" src="/static/js/prettify.js"></script>
     <script src="{% static 'jquery1.12.4.min.js' %}"></script>
     <script src="{% static 'bootstrap-3.3.7-dist/js/bootstrap.min.js' %}"></script>
-    <link rel="stylesheet" type="text/css" href="{%  static 'bootstrap-3.3.7-dist/css/bootstrap.min.css' %}">  
+    <link rel="stylesheet" type="text/css" href="{%  static 'bootstrap-3.3.7-dist/css/bootstrap.min.css' %}"> 
+    <script src="http://cdn.amazeui.org/amazeui/2.7.2/js/amazeui.min.js"></script>
+    <link rel="stylesheet" href="http://cdn.amazeui.org/amazeui/2.7.2/css/amazeui.min.css"> 
     {% block header_extends %}{% endblock %}
 </head>
 <body>
@@ -33,11 +35,20 @@
                 <ul class="nav navbar-nav">
                     <li class="{% block home_active %}{% endblock %}"><a href="{% url 'home' %}"><span class="glyphicon glyphicon-home" style="margin-right: 0.5em"></span>首页</a></li>
                     <li class="{% block blogs_list_active %}{% endblock %}"><a href="{% url 'blogs_list' %}"><span class="glyphicon glyphicon-pencil" style="margin-right: 0.5em"></span>博客</a></li>
+
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
+                  <li>
+                  <form action="{% url 'search' %}" method="get">
+                  <div class="am-form-group am-form-icon">
+                  <input type="text" name="kw" class="am-form-field am-input-sm am-round" placeholder="搜索一下">
+                  <span class="am-icon-search"></span>
+                  </div>
+                  </form>
+                  </li>
                 {% if request.session.username %}
                 <li class="dropdown" role="presentation">
-                    <a role="button" id="info" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="{{request.session.avatar_url}}" class="img-rounded">您好,{{ request.session.username }} <span class="caret"></span></a>
+                    <a role="button" id="info" class="btn btn-default dropdon-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="{{request.session.avatar_url}}" class="img-rounded">您好,{{ request.session.username }} <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                       <li><a href="{% url 'user_info' %}">个人中心</a></li>
                       <li><a href="{% url 'user_avatar' %}">修改头像</a></li>
@@ -56,13 +67,18 @@
             </div>
         </div>
     </nav>
-
-    
-    {% block content %}{% endblock %}
-    <div class="footer">
-      <div class="copyright">
-        <span style="font-size:1.1em">welcome to visit my website©sup_loser</span>
+    <div class="wrapper">
+      <div class="page">
+      {% block content %}{% endblock %}
       </div>
+    </div>
+    <div class="footer">
+    <div class="copyright">
+    <span style="font-size:1.1em;font-weight: bold;
+     font-style: italic;">welcome to visit my website©sup_loser
+   </span>
+    </div>
+    </div>
     </div>
     <!-- 登陆模态框 -->
     <div class="modal fade" id="login" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -219,6 +235,7 @@
         });
       });
       prettyPrint();
+      // 滚动条事件
       window.onscroll = function(){
         var t = $('html').scrollTop();
         if(t>=300){
@@ -230,6 +247,7 @@
       $('a.scrollTop').click(function(){
         $('html').animate({scrollTop:'0'}, 500);
       })
+
     </script>
     {% block scriptarea %}{% endblock %}
 </body> 
