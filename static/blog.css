@@ -3,7 +3,8 @@ ul.blog-type li {
 }
 ul.blog-info {
     list-style-type: none;
-    margin-bottom: 2em;
+    margin-bottom: 0.1em;
+    padding-left: 0;
 }
 ul.blog-info li {
     display: inline-block;
@@ -23,6 +24,7 @@ div.blog-content {
 }
 p.blog-info {
     margin-top: 2em;
+    font-size: 0.9em;
 }
 
 div.paginator {
