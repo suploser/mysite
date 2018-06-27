@@ -10,7 +10,6 @@ from utils import SendEmail
 # 写一个装饰器来验证是否登录
 def update_comment(request):
     data={}
-    send_email = SendEmail()
     # 填充数据
     comment_form = CommentForm(request.POST, session=request.session)
     if comment_form.is_valid():
@@ -44,12 +43,13 @@ def update_comment(request):
         if not data['root_id']:
             subject = '新的博客评论'
             module = 'email/comment_email.html'
-            send_email.send_email_by_template(subject, module, email_data, settings.EMAIL_DEFAULT_FROM)
+            email_to = settings.EMAIL_DEFAULT_FROM 
         else:
             subject='新回复'
             module = 'email/reply_email.html'
             email_to = comment.reply_to.email
-            send_email.send_email_by_template(subject, module, email_data, email_to)
+        send_email = SendEmail(subject, module, email_data, email_to)
+        send_email.start()
     else:
         data['status'] = 'ERROR'
         # form.errors包括non_field_errors
