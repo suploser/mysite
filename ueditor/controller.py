@@ -109,7 +109,9 @@ def uploadFile(request,config):
             return HttpResponse(buildJsonResult(result))
 
         try:
+            print('*****')
             truelyName = buildFileName(config.PathFormat, filename)
+            print('*****')
             webUrl = config.SavePath+ truelyName
             savePath = base_dir + webUrl
 
