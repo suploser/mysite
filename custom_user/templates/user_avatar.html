@@ -101,7 +101,7 @@
     });
     $('#avatar_input').change(function(){
         // 加载本地图片
-        var URL = window.URL || window.webkitURL;
+        var URL = window.URL || window.webkitURL;//浏览器兼容
         if(URL != undefined){
             // file对象,
             // or var files = $(this)[0].files[0];
