@@ -106,6 +106,7 @@ def regist(request):
             referer = request.GET.get('from', reverse('home'))
             token = utils.make_confirm_string(user.username)
             utils.send_confirm_email(email, token, referer)
+            # 也可使用session来保存
             ConfirmString.objects.create(user=user, token=token)
             message = '注册成功, 请前往邮箱确认'
             referer = 'http://127.0.0.1:8000'+referer
