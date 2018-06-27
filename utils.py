@@ -1,3 +1,4 @@
+import threading
 from django.conf import settings
 from django.template import loader
 from django.core.mail import EmailMultiAlternatives
@@ -8,7 +9,7 @@ def send_confirm_email(email, token, referer='/'):
         感谢注册,但你的邮箱服务器不支持html链接功能,请联系管理员!
     '''
     html_content = '''
-        <p>感谢注册<a href="http://%s/user/confirm?token=%s&from=%s">个人博客</a></p>
+        <p>感谢注册<a href="%s/user/confirm?token=%s&from=%s">个人博客</a></p>
         <p>请点击链接完成注册!</p>
         <p>该链接的有效期为%s天</p>
     '''%(settings.SITE_IP, token, referer, settings.CONFIRM_DAYS)
@@ -31,6 +32,7 @@ def make_confirm_string(str):
     return token
 
 # 发送验证码邮件 
+# 计划使用clery发送邮件
 def send_email_code(email, token):
     subject = '邮箱验证码'
     text_content = '''
@@ -42,7 +44,14 @@ def send_email_code(email, token):
     # 邮件发送异常不报错
     msg.send(True)
 
-class SendEmail(object):
+class SendEmail(threading.Thread):
+    def __init__(self, subject, module, data, email_to):
+        self.subject = subject
+        self.module = module
+        self.data = data
+        self.email_to = email_to
+        threading.Thread.__init__(self)
+
     def send_html_email(self, subject, html_content, email_to):
         text_content = '''
         你的邮箱服务器不支持html链接功能,请联系管理员!
@@ -55,3 +64,6 @@ class SendEmail(object):
         # 将模板转化为字符串
         html_content = loader.render_to_string(module, data)
         self.send_html_email(subject, html_content, email_to)
+# 多线程发送邮件
+    def run(self):
+        self.send_email_by_template(self.subject, self.module, self.data, self.email_to)
